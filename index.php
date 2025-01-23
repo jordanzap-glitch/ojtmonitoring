@@ -95,7 +95,9 @@ if (isset($_POST['login'])) {
         $_SESSION['user_type'] = 'Administrator'; // Set session user type
 
         // Redirect to admin dashboard
-        header('Location: Admin/index.php');
+        echo "<script type='text/javascript'>
+        window.location = 'Admin/index.php';
+        </script>";
     }
     else {
         // Check in Class Teacher table
