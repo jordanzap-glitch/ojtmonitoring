@@ -40,7 +40,7 @@ CREATE TABLE `tbladmin` (
 --
 
 INSERT INTO `tbladmin` (`Id`, `firstName`, `lastName`, `emailAddress`, `password`) VALUES
-(1, 'Admin', '', 'admin@mail.com', '2457dffa9d96aa0e810c980ea8423267');
+(1, 'Admin', '', 'src@mail.com', '12345678');
 
 -- --------------------------------------------------------
 
