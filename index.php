@@ -139,9 +139,7 @@ if (isset($_POST['login'])) {
                 $_SESSION['user_type'] = 'Student'; // Set session user type
 
                 // Redirect to student dashboard
-                echo "<script type='text/javascript'>
-                window.location = 'Student/index.php';
-                </script>";
+                header('Location: Admin/index.php');
             } 
             else {
                 // Invalid username or password
