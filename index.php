@@ -95,9 +95,7 @@ if (isset($_POST['login'])) {
         $_SESSION['user_type'] = 'Administrator'; // Set session user type
 
         // Redirect to admin dashboard
-        echo "<script type='text/javascript'>
-        window.location = 'Admin/index.php';
-        </script>";
+        header('Location: Admin/index.php');
     }
     else {
         // Check in Class Teacher table
@@ -139,7 +137,9 @@ if (isset($_POST['login'])) {
                 $_SESSION['user_type'] = 'Student'; // Set session user type
 
                 // Redirect to student dashboard
-                header('Location: Admin/index.php');
+                echo "<script type='text/javascript'>
+                window.location = 'Student/index.php';
+                </script>";
             } 
             else {
                 // Invalid username or password
