@@ -95,7 +95,7 @@ if (isset($_POST['login'])) {
         $_SESSION['user_type'] = 'Administrator'; // Set session user type
 
         // Redirect to admin dashboard
-        header('Location: Admin/index.php');
+        header('Location:Admin/index.php');
         exit();
     }
     else {
@@ -116,7 +116,7 @@ if (isset($_POST['login'])) {
             $_SESSION['user_type'] = 'ClassTeacher'; // Set session user type
 
             // Redirect to class teacher dashboard
-            header('Location: ClassTeacher/index.php');
+            header('Location:ClassTeacher/index.php');
         }
         else {
             // Check in Student table
@@ -136,7 +136,7 @@ if (isset($_POST['login'])) {
                 $_SESSION['user_type'] = 'Student'; // Set session user type
 
                 // Redirect to student dashboard
-                header('Location: Student/index.php');
+                header('Location:Student/index.php');
             } 
             else {
                 // Invalid username or password
