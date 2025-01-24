@@ -70,8 +70,9 @@ include 'Includes/dbcon.php';
                      </form>
 
 <?php
-include 'Includes/dbcon.php';
 session_start();
+include 'Includes/dbcon.php';
+
 
 if (isset($_POST['login'])) {
 
