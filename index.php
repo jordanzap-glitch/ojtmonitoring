@@ -71,7 +71,7 @@ include 'Includes/dbcon.php';
 
 <?php
 include 'Includes/dbcon.php';
-session_start();
+//session_start();
 
 if (isset($_POST['login'])) {
 
