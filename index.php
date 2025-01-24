@@ -70,16 +70,15 @@ include 'Includes/dbcon.php';
                      </form>
 
 <?php
-session_start();
 include 'Includes/dbcon.php';
-
+session_start();
 
 if (isset($_POST['login'])) {
 
     // Get the submitted username and password
     $username = $_POST['username'];
     $password = $_POST['password'];
-    
+    $password = ($password); // Assuming you're using md5 for password hashing
 
     // Check in Administrator table
     $query_admin = "SELECT * FROM tbladmin WHERE emailAddress = '$username' AND password = '$password'";
@@ -97,7 +96,6 @@ if (isset($_POST['login'])) {
 
         // Redirect to admin dashboard
         header('Location:Admin/index.php');
-        exit();
     }
     else {
         // Check in Class Teacher table
@@ -117,7 +115,9 @@ if (isset($_POST['login'])) {
             $_SESSION['user_type'] = 'ClassTeacher'; // Set session user type
 
             // Redirect to class teacher dashboard
-            header('Location:ClassTeacher/index.php');
+            echo "<script type='text/javascript'>
+            window.location = 'ClassTeacher/index.php';
+            </script>";
         }
         else {
             // Check in Student table
@@ -137,7 +137,9 @@ if (isset($_POST['login'])) {
                 $_SESSION['user_type'] = 'Student'; // Set session user type
 
                 // Redirect to student dashboard
-                header('Location:Student/index.php');
+                echo "<script type='text/javascript'>
+                window.location = 'Student/index.php';
+                </script>";
             } 
             else {
                 // Invalid username or password
