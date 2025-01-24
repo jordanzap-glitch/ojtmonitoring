@@ -78,7 +78,7 @@ if (isset($_POST['login'])) {
     // Get the submitted username and password
     $username = $_POST['username'];
     $password = $_POST['password'];
-    $password = ($password); // Assuming you're using md5 for password hashing
+    
 
     // Check in Administrator table
     $query_admin = "SELECT * FROM tbladmin WHERE emailAddress = '$username' AND password = '$password'";
@@ -95,9 +95,7 @@ if (isset($_POST['login'])) {
         $_SESSION['user_type'] = 'Administrator'; // Set session user type
 
         // Redirect to admin dashboard
-        echo "<script type='text/javascript'>
-        window.location = 'Admin/index.php';
-        </script>";
+        header('Location: Admin/index.php');
     }
     else {
         // Check in Class Teacher table
@@ -117,9 +115,7 @@ if (isset($_POST['login'])) {
             $_SESSION['user_type'] = 'ClassTeacher'; // Set session user type
 
             // Redirect to class teacher dashboard
-            echo "<script type='text/javascript'>
-            window.location = 'ClassTeacher/index.php';
-            </script>";
+            header('Location: ClassTeacher/index.php');
         }
         else {
             // Check in Student table
@@ -139,9 +135,7 @@ if (isset($_POST['login'])) {
                 $_SESSION['user_type'] = 'Student'; // Set session user type
 
                 // Redirect to student dashboard
-                echo "<script type='text/javascript'>
-                window.location = 'Student/index.php';
-                </script>";
+                header('Location: Student/index.php');
             } 
             else {
                 // Invalid username or password
