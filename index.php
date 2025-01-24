@@ -96,7 +96,7 @@ if (isset($_POST['login'])) {
 
         // Redirect to admin dashboard
         header('Location: Admin/index.php');
-        exit();s
+        exit();
     }
     else {
         // Check in Class Teacher table
