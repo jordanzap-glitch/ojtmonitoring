@@ -1,8 +1,8 @@
-
 <?php 
 error_reporting(0);
-include '../Includes/dbcon.php';
 include '../Includes/session.php';
+include '../Includes/dbcon.php';
+
 
 //------------------------SAVE--------------------------------------------------
 
@@ -281,7 +281,7 @@ if(isset($_POST['save'])){
         required 
         name="password" 
         id="exampleInputFirstName"
-        pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}" 
+       
         title="Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character."
     >
 </div>

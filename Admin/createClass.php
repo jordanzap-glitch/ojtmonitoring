@@ -1,9 +1,8 @@
-
 <?php 
 error_reporting(0);
-include '../Includes/dbcon.php';
 include '../Includes/session.php';
-
+include '../Includes/dbcon.php';
+$statusMsg = "";
 //------------------------SAVE--------------------------------------------------
 
 if(isset($_POST['save'])){
@@ -104,7 +103,7 @@ if(isset($_POST['save'])){
   <meta name="description" content="">
   <meta name="author" content="">
   <link href="img/logo/attnlg.jpg" rel="icon">
-<?php include 'includes/title.php';?>
+<?php include 'Includes/title.php';?>
   <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
   <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
   <link href="css/ruang-admin.min.css" rel="stylesheet">
@@ -136,7 +135,7 @@ if(isset($_POST['save'])){
               <!-- Form Basic -->
               <div class="card mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">Create Course</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">Create Course and Section Ex.(BSIS 4A)</h6>
                     <?php echo $statusMsg; ?>
                 </div>
                 <div class="card-body">

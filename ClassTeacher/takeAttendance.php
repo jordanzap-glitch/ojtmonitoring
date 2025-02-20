@@ -1,8 +1,8 @@
-
 <?php 
 error_reporting(0);
-include '../Includes/dbcon.php';
 include '../Includes/session.php';
+include '../Includes/dbcon.php';
+
 
     $query = "SELECT tblclass.className,tblclassarms.classArmName 
     FROM tblclassteacher

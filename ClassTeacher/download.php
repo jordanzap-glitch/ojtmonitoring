@@ -1,9 +1,7 @@
-
 <?php 
 error_reporting(0);
-include '../Includes/dbcon.php';
 include '../Includes/session.php';
-
+include '../Includes/dbcon.php';
 $query = "SELECT tblclass.className,tblclassarms.classArmName 
     FROM tblclassteacher
     INNER JOIN tblclass ON tblclass.Id = tblclassteacher.classId
@@ -103,8 +101,8 @@ $query = "SELECT tblclass.className,tblclassarms.classArmName
                     <th>Student ID</th>
                     <th>Uploaded File</th>
                     <th>Date Submitted</th>
-                    <th>Download</th>
-                        
+                    
+
                       </tr>
                     </thead>
                     
@@ -113,13 +111,13 @@ $query = "SELECT tblclass.className,tblclassarms.classArmName
                 // Display the uploaded files and download links
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
-                        $file_path = "uploaded/" . $row['filename'];
+                        $file_path = "../uploads/" . $row['Files'];
                         ?>
                         <tr>
                             <td><?php echo $row['Task_Code']; ?></td>
-                            <td><?php echo $row['Student_id']; ?></td>
-                            <td><?php echo $row['Uploaded_File']; ?> bytes</td>
-                            <td><?php echo $row['Date_of_Submission']; ?> bytes</td>
+                            <td><?php echo $row['Student_ID']; ?></td>
+                            <td><?php echo $row['Files']; ?> bytes</td>
+                            <td><?php echo $row['Date_Submit']; ?> bytes</td>
                             <td><?php echo $row['']; ?></td>
                             <td><a href="<?php echo $file_path; ?>" class="btn btn-primary" download>Download</a></td>
                         </tr>

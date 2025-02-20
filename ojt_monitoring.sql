@@ -40,7 +40,7 @@ CREATE TABLE `tbladmin` (
 --
 
 INSERT INTO `tbladmin` (`Id`, `firstName`, `lastName`, `emailAddress`, `password`) VALUES
-(1, 'Admin', '', 'admin@mail.com', '2457dffa9d96aa0e810c980ea8423267');
+(1, 'Admin', '', 'admin@mail.com', '123');
 
 -- --------------------------------------------------------
 
@@ -294,7 +294,7 @@ CREATE TABLE `tbluser` (
 --
 
 INSERT INTO `tbluser` (`Id`, `emailAddress`, `password`, `user_type`) VALUES
-(3, 'admin@mail.com', '2457dffa9d96aa0e810c980ea8423267', 'Admin');
+(3, 'admin@mail.com', '123', 'Admin');
 
 --
 -- Indexes for dumped tables

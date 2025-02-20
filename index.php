@@ -1,11 +1,89 @@
-
-<?php 
+<?php
+ob_start();
+session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 include 'Includes/dbcon.php';
-//session_start();
+if (isset($_POST['login'])) {
 
+    // Get the submitted username and password
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $password = ($password); // Assuming you're using md5 for password hashing
 
+    // Check in Administrator table
+    $query_admin = "SELECT * FROM tbladmin WHERE emailAddress = '$username' AND password = '$password'";
+    $rs_admin = $conn->query($query_admin);
+    $num_admin = $rs_admin->num_rows;
+    $rows_admin = $rs_admin->fetch_assoc();
+
+    if ($num_admin > 0) {
+        // Admin user detected
+        $_SESSION['userId'] = $rows_admin['Id'];
+        $_SESSION['firstName'] = $rows_admin['firstName'];
+        $_SESSION['lastName'] = $rows_admin['lastName'];
+        $_SESSION['emailAddress'] = $rows_admin['emailAddress'];
+        $_SESSION['user_type'] = 'Administrator'; // Set session user type
+
+        // Redirect to admin dashboard
+        header('Location:Admin/index.php');
+        exit();
+    }
+    else {
+        // Check in Class Teacher table
+        $query_teacher = "SELECT * FROM tblclassteacher WHERE emailAddress = '$username' AND password = '$password'";
+        $rs_teacher = $conn->query($query_teacher);
+        $num_teacher = $rs_teacher->num_rows;
+        $rows_teacher = $rs_teacher->fetch_assoc();
+
+        if ($num_teacher > 0) {
+            // Class Teacher detected
+            $_SESSION['userId'] = $rows_teacher['Id'];
+            $_SESSION['firstName'] = $rows_teacher['firstName'];
+            $_SESSION['lastName'] = $rows_teacher['lastName'];
+            $_SESSION['emailAddress'] = $rows_teacher['emailAddress'];
+            $_SESSION['classId'] = $rows_teacher['classId'];
+            $_SESSION['classArmId'] = $rows_teacher['classArmId'];
+            $_SESSION['user_type'] = 'ClassTeacher'; // Set session user type
+
+            
+            
+            header('Location:ClassTeacher/index.php');
+            exit();
+        }
+        else {
+            // Check in Student table
+            $query_student = "SELECT * FROM tblstudents WHERE email = '$username' AND password = '$password'";
+            $rs_student = $conn->query($query_student);
+            $num_student = $rs_student->num_rows;
+            $rows_student = $rs_student->fetch_assoc();
+
+            if ($num_student > 0) {
+                // Student detected
+                $_SESSION['userId'] = $rows_student['Id'];
+                $_SESSION['firstName'] = $rows_student['firstName'];
+                $_SESSION['lastName'] = $rows_student['lastName'];
+                $_SESSION['email'] = $rows_student['email'];
+                $_SESSION['classId'] = $rows_student['classId'];
+                $_SESSION['classArmId'] = $rows_student['classArmId'];
+                $_SESSION['user_type'] = 'Student'; // Set session user type
+
+                // Redirect to student dashboard
+                echo "<script type='text/javascript'>
+                window.location = 'Student/index.php';
+                </script>";
+            } 
+            else {
+                // Invalid username or password
+                echo "<div class='alert alert-danger' role='alert'>
+                Invalid Username/Password!
+                </div>";
+            }
+        }
+    }
+}
+ob_end_flush();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,7 +102,7 @@ include 'Includes/dbcon.php';
 
 </head>
 
-<body class="bg-gradient-login" style="background-image: url('img/logo/loral1.jpe00g');">
+<body class="bg-gradient-login">
   <!-- Login Content -->
   <div class="container-login">
     <div class="row justify-content-center">
@@ -68,89 +146,6 @@ include 'Includes/dbcon.php';
                         <input type="submit"  class="btn btn-success btn-block" value="Login" name="login" />
                     </div>
                      </form>
-
-<?php
-include 'Includes/dbcon.php';
-session_start();
-
-if (isset($_POST['login'])) {
-
-    // Get the submitted username and password
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    //$password = ($password); // Assuming you're using md5 for password hashing
-
-    // Check in Administrator table
-    $query_admin = "SELECT * FROM tbladmin WHERE emailAddress = '$username' AND password = '$password'";
-    $rs_admin = $conn->query($query_admin);
-    $num_admin = $rs_admin->num_rows;
-    $rows_admin = $rs_admin->fetch_assoc();
-
-    if ($num_admin > 0) {
-        // Admin user detected
-        $_SESSION['userId'] = $rows_admin['Id'];
-        $_SESSION['firstName'] = $rows_admin['firstName'];
-        $_SESSION['lastName'] = $rows_admin['lastName'];
-        $_SESSION['emailAddress'] = $rows_admin['emailAddress'];
-        $_SESSION['user_type'] = 'Administrator'; // Set session user type
-
-        // Redirect to admin dashboard
-        header('Location:Admin/index.php');
-    }
-    else {
-        // Check in Class Teacher table
-        $query_teacher = "SELECT * FROM tblclassteacher WHERE emailAddress = '$username' AND password = '$password'";
-        $rs_teacher = $conn->query($query_teacher);
-        $num_teacher = $rs_teacher->num_rows;
-        $rows_teacher = $rs_teacher->fetch_assoc();
-
-        if ($num_teacher > 0) {
-            // Class Teacher detected
-            $_SESSION['userId'] = $rows_teacher['Id'];
-            $_SESSION['firstName'] = $rows_teacher['firstName'];
-            $_SESSION['lastName'] = $rows_teacher['lastName'];
-            $_SESSION['emailAddress'] = $rows_teacher['emailAddress'];
-            $_SESSION['classId'] = $rows_teacher['classId'];
-            $_SESSION['classArmId'] = $rows_teacher['classArmId'];
-            $_SESSION['user_type'] = 'ClassTeacher'; // Set session user type
-
-            // Redirect to class teacher dashboard
-            echo "<script type='text/javascript'>
-            window.location = 'ClassTeacher/index.php';
-            </script>";
-        }
-        else {
-            // Check in Student table
-            $query_student = "SELECT * FROM tblstudents WHERE email = '$username' AND password = '$password'";
-            $rs_student = $conn->query($query_student);
-            $num_student = $rs_student->num_rows;
-            $rows_student = $rs_student->fetch_assoc();
-
-            if ($num_student > 0) {
-                // Student detected
-                $_SESSION['userId'] = $rows_student['Id'];
-                $_SESSION['firstName'] = $rows_student['firstName'];
-                $_SESSION['lastName'] = $rows_student['lastName'];
-                $_SESSION['email'] = $rows_student['email'];
-                $_SESSION['classId'] = $rows_student['classId'];
-                $_SESSION['classArmId'] = $rows_student['classArmId'];
-                $_SESSION['user_type'] = 'Student'; // Set session user type
-
-                // Redirect to student dashboard
-                echo "<script type='text/javascript'>
-                window.location = 'Student/index.php';
-                </script>";
-            } 
-            else {
-                // Invalid username or password
-                echo "<div class='alert alert-danger' role='alert'>
-                Invalid Username/Password!
-                </div>";
-            }
-        }
-    }
-}
-?>
 
                     <!-- <hr>
                     <a href="index.html" class="btn btn-google btn-block">

@@ -1,4 +1,3 @@
-
 <?php
 session_start(); 
 
@@ -9,7 +8,6 @@ if (!isset($_SESSION['userId']))
   </script>";
 
 }
- 
 // $expiry = 1800 ;//session expiry required after 30 mins
 // if (isset($_SESSION['LAST']) && (time() - $_SESSION['LAST'] > $expiry)) {
 
@@ -21,5 +19,4 @@ if (!isset($_SESSION['userId']))
 
 // }
 // $_SESSION['LAST'] = time();
-    
 ?>

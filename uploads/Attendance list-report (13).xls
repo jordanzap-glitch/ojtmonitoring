@@ -1,0 +1,33 @@
+
+        <table border="1">
+        <thead>
+            <tr>
+           
+            <th>Student ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Session</th>
+            <th>Term</th>
+            <th>Status</th>
+            <th>Date</th>
+            </tr>
+        </thead>
+
+  
+<tr>   
+
+<td>S1001</td>
+<td>Jordan</td> 
+<td>Zapanta</td> 
+<td>0949525</td> 
+<td>jordan@gmail.com</td>
+<td>sa malayo</td> 
+<td>2021/2022</td>	 
+<td>First</td>	
+<td>Absent</td>	 	
+<td>2025-01-30</td>	 					
+</tr>  
+</table>

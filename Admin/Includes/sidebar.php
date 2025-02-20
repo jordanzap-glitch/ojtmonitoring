@@ -26,41 +26,29 @@
         <div id="collapseBootstrap4" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Manage Course</h6>
-            <a class="collapse-item" href="createClass.php">Add New Course</a>
+            <a class="collapse-item" href="createClass.php">Add New Course and Section</a>
             <!-- <a class="collapse-item" href="#">Member List</a> -->
           </div>
         </div>
       </li>
       
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBootstrap"
-          aria-expanded="true" aria-controls="collapseBootstrap">
-          <i class="fas fa-chalkboard"></i>
-          <span>Manage Sections</span>
-        </a>
-        <div id="collapseBootstrap" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Manage Sections</h6>
-            <a class="collapse-item" href="createClassArms.php">Add New Class Section</a>
-            <!-- <a class="collapse-item" href="#">Member List</a> -->
-          </div>
-        </div>
-      </li>
     
-       <hr class="sidebar-divider">
+    
+
+      <hr class="sidebar-divider">
       <div class="sidebar-heading">
-        Coordinator(s)
+        DTR(s)
       </div>
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBootstrapassests"
           aria-expanded="true" aria-controls="collapseBootstrapassests">
           <i class="fas fa-chalkboard-teacher"></i>
-          <span>Manage Coordinator</span>
+          <span>Weekly Time Entries</span>
         </a>
         <div id="collapseBootstrapassests" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Manage Coordinator</h6>
-             <a class="collapse-item" href="createClassTeacher.php">Add New Coordinator</a>
+            <h6 class="collapse-header">Student Time</h6>
+             <a class="collapse-item" href="viewtime.php">Time Table</a>
               <!-- <a class="collapse-item" href="assetsCategoryList.php">Assets Category List</a>
              <a class="collapse-item" href="createAssets.php">Create Assets</a> -->
           </div>

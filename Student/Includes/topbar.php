@@ -1,4 +1,3 @@
-
 <?php 
 
   $query = "SELECT * FROM tblstudents WHERE Id = ".$_SESSION['userId']."";

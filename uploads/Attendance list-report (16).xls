@@ -1,0 +1,35 @@
+
+
+
+        <table border="1">
+        <thead>
+            <tr>
+           
+            <th>Student ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Session</th>
+            <th>Term</th>
+            <th>Status</th>
+            <th>Date</th>
+            </tr>
+        </thead>
+
+  
+<tr>   
+
+<td>2002</td>
+<td>zap</td> 
+<td>zapanta</td> 
+<td>09594</td> 
+<td>student@gmail.com</td>
+<td>samalayo</td> 
+<td>2024/2025</td>	 
+<td>Third</td>	
+<td>Present</td>	 	
+<td>2025-01-30</td>	 					
+</tr>  
+</table>

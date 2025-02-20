@@ -1,7 +1,8 @@
 <?php 
-error_reporting(0);
-include '../Includes/dbcon.php';
+ob_start();
 include '../Includes/session.php';
+include '../Includes/dbcon.php';
+$statusMsg = "";
 
 ?>
         <table border="1">
@@ -67,5 +68,6 @@ header("Expires: 0");
 			$cnt++;
 			}
 	}
+ob_end_flush();
 ?>
 </table>

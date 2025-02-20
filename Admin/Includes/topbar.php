@@ -1,5 +1,5 @@
-
 <?php 
+error_reporting(0);
   $query = "SELECT * FROM tbladmin WHERE Id = ".$_SESSION['userId']."";
   $rs = $conn->query($query);
   $num = $rs->num_rows;
@@ -23,7 +23,7 @@
                 <form class="navbar-search">
                   <div class="input-group">
                     <input type="text" class="form-control bg-light border-1 small" placeholder="What do you want to look for?"
-                      aria-label="Search" aria-describedby="basic-addon2" style="border-color: #3f51b5;">
+                      aria-label="Search" aria-describedby="basic-addon2" style="border-color:rgb(145, 41, 127);">
                     <div class="input-group-append">
                       <button class="btn btn-primary" type="button">
                         <i class="fas fa-search fa-sm"></i>

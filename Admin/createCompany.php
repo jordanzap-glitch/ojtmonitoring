@@ -1,8 +1,8 @@
-
 <?php 
 error_reporting(0);
-include '../Includes/dbcon.php';
 include '../Includes/session.php';
+include '../Includes/dbcon.php';
+
 
 //------------------------SAVE--------------------------------------------------
 
@@ -12,6 +12,7 @@ if(isset($_POST['save'])){
     $ContPerson=$_POST['contact_person'];
     $ContNum=$_POST['contact_num'];
     $CompAdd=$_POST['comp_address'];
+    $comp_link=$_POST['comp_link'];
 
    
     $query=mysqli_query($conn,"select * from tblcompany where comp_name ='$CompName'");
@@ -23,8 +24,8 @@ if(isset($_POST['save'])){
     }
     else{
 
-        $query=mysqli_query($conn,"insert into tblcompany(comp_name,contact_person, contact_num,comp_address) 
-        value('$CompName', '$ContPerson', '$ContNum', '$CompAdd')");
+        $query=mysqli_query($conn,"insert into tblcompany(comp_name,contact_person, contact_num,comp_address, comp_link) 
+        value('$CompName', '$ContPerson', '$ContNum', '$CompAdd','$comp_link')");
 
     if ($query) {
         
@@ -60,9 +61,10 @@ if (isset($_GET['Id']) && isset($_GET['action']) && $_GET['action'] == "edit")
     $ContPerson=$_POST['contact_person'];
     $ContNum=$_POST['contact_num'];
     $CompAdd=$_POST['comp_address'];
+    $comp_link=$_POST['comp_link'];
 
     $query=mysqli_query($conn,"update tblcompany set comp_name ='$CompName', contact_person ='$ContPerson',
-    contact_num ='$ContNum', comp_address ='$CompAdd' where Id='$Id'");
+    contact_num ='$ContNum', comp_address ='$CompAdd', comp_link ='$comp_link' where Id='$Id'");
 
     if ($query) {
         
@@ -83,7 +85,7 @@ if (isset($_GET['Id']) && isset($_GET['action']) && $_GET['action'] == "delete")
 {
     $Id= $_GET['Id'];
 
-    $query = mysqli_query($conn,"DELETE FROM tbldompany WHERE Id='$Id'");
+    $query = mysqli_query($conn,"DELETE FROM tblcompany WHERE Id='$Id'");
 
     if ($query == TRUE) {
 
@@ -161,12 +163,14 @@ if (isset($_GET['Id']) && isset($_GET['action']) && $_GET['action'] == "delete")
                     <div class="form-group row mb-3">
                     <div class="col-xl-6">
                             <label class="form-control-label">Contact Number<span class="text-danger ml-2">*</span></label>
-                      <input type="text" class="form-control" name="contact_num" value="<?php echo $row['contact_num'];?>" id="exampleInputFirstName">
+                            <input type="text" class="form-control" name="contact_num" value="<?php echo $row['contact_num'];?>" id="exampleInputFirstName">
+                            <label class="form-control-label">Company Link<span class="text-danger ml-2">*</span></label>
+                            <input type="text" class="form-control" name="comp_link" value="<?php echo $row['contact_num'];?>" id="exampleInputFirstName">
                         </div>
 
                         <div class="col-xl-6">
                             <label class="form-control-label">Company Address<span class="text-danger ml-2">*</span></label>
-                      <input type="text" class="form-control" name="comp_address" value="<?php echo $row['comp_address'];?>" id="exampleInputFirstName">
+                            <input type="text" class="form-control" name="comp_address" value="<?php echo $row['comp_address'];?>" id="exampleInputFirstName">
                         </div>
 
                         </div>
@@ -203,6 +207,7 @@ if (isset($_GET['Id']) && isset($_GET['action']) && $_GET['action'] == "delete")
                         <th>Contact Person</th>
                         <th>Contact Number</th>
                         <th>Company Address</th>
+                        <th>Company Link</th>
                         <th>Edit</th>
                         <th>Delete</th>
                       </tr>
@@ -226,6 +231,7 @@ if (isset($_GET['Id']) && isset($_GET['action']) && $_GET['action'] == "delete")
                                 <td>".$rows['contact_person']."</td>
                                 <td>".$rows['contact_num']."</td>
                                 <td>".$rows['comp_address']."</td>
+                                <td>".$rows['comp_link']."</td>
 
                                 <td><a href='?action=edit&Id=".$rows['Id']."'><i class='fas fa-fw fa-edit'></i>Edit</a></td>
                                 <td><a href='?action=delete&Id=".$rows['Id']."'><i class='fas fa-fw fa-trash'></i>Delete</a></td>
