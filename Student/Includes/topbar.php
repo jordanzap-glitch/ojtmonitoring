@@ -1,5 +1,5 @@
 <?php 
-
+error_reporting(0);
   $query = "SELECT * FROM tblstudents WHERE Id = ".$_SESSION['userId']."";
   $rs = $conn->query($query);
   $num = $rs->num_rows;
