@@ -1,16 +1,16 @@
 <?php
 error_reporting(0);
+session_start();
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
 // Assuming you have validated the user and fetched their details
 // Store admission number in session
 
-
 if (isset($_SESSION['email'])) {
-  // Fetch the admission number and full name from the database
+  // Fetch the admission number, full name, company name, and company link from the database
   $username = $_SESSION['email']; // Assuming username is stored in session
-  $query = "SELECT admissionNumber, firstName, lastName, comp_name, classId, classArmId FROM tblstudents WHERE email = '$username'";
+  $query = "SELECT admissionNumber, firstName, lastName, comp_name, comp_link, classId FROM tblstudents WHERE email = '$username'";
   $result = mysqli_query($conn, $query);
   if ($result) {
       $row = mysqli_fetch_assoc($result);
@@ -20,153 +20,148 @@ if (isset($_SESSION['email'])) {
       $fullName = trim($row['firstName'] . ' ' . $row['lastName']);
       $_SESSION['student_fullname'] = $fullName; // Store full name in session
 
+      // Store company name and link in session
+      $_SESSION['comp_name'] = $row['comp_name']; // Store company name in session
+      $_SESSION['comp_link'] = $row['comp_link']; // Store company link in session
 
-       // Store company name in session
-       $_SESSION['comp_name'] = $row['comp_name']; // Store company name in session
-
-       $_SESSION['classId'] = $row['classId']; // Store classId in session
-       $_SESSION['classArmId'] = $row['classArmId'];
-      
+      $_SESSION['classId'] = $row['classId']; // Store classId in session
   }
 }
-
 
 if (isset($_SESSION['classId'])) {
-  $classId = $_SESSION['classId'];
-  $classQuery = "SELECT className FROM tblclass WHERE Id = '$classId'";
-  $classResult = mysqli_query($conn, $classQuery);
-  if ($classResult) {
-      $classRow = mysqli_fetch_assoc($classResult);
-      $_SESSION['className'] = $classRow['className']; // Store class name in session
-  }
+    $classId = $_SESSION['classId'];
+    $classQuery = "SELECT className FROM tblclass WHERE Id = '$classId'";
+    $classResult = mysqli_query($conn, $classQuery);
+    if ($classResult) {
+        $classRow = mysqli_fetch_assoc($classResult);
+        $_SESSION['className'] = $classRow['className']; // Store class name in session
+    }
 }
-
-
-if (isset($_SESSION['classArmId'])) {
-  $classArmId = $_SESSION['classArmId'];
-  $classArmQuery = "SELECT classArmName FROM tblclassarms WHERE Id = '$classArmId'";
-  $classArmResult = mysqli_query($conn, $classArmQuery);
-  if ($classArmResult) {
-      $classArmRow = mysqli_fetch_assoc($classArmResult);
-      $_SESSION['classArmName'] = $classArmRow['classArmName']; // Store class arm name in session
-  }
-}
-
 
 if (isset($_POST['submit_time'])) {
-    // Get the input values
-    $admissionNumber = $_POST['admissionNumber']; // Get the admission number
-    $studentFullname = $_POST['student_fullname'];
-    $course = $_POST['course'];
-    $section = $_POST['section'];
-    $weekStartDate = $_POST['week_start_date'];
-    $comp_name = $_POST['comp_name'];
-    $comp_link = $_POST['comp_link'];
+  // Check if the form has already been submitted
+  if (isset($_SESSION['form_submitted']) && $_SESSION['form_submitted'] === true) {
+      $statusMsg = "<div class='alert alert-danger'>You have already submitted the form.</div>";
+  } else {
+      // Check if today is Sunday
+      if (date('N') != 4) { // 7 means Sunday
+          $statusMsg = "<div class='alert alert-danger'>The form can only be submitted on Sundays.</div>";
+      } else {
+          // Get the input values
+          $admissionNumber = $_POST['admissionNumber']; // Get the admission number
+          $studentFullname = $_POST['student_fullname'];
+          $course = $_POST['course'];
+          $weekStartDate = $_POST['week_start_date'];
+          $comp_name = $_POST['comp_name'];
+          $comp_link = $_POST['comp_link'];
 
-    // Validate that the week start date is a Monday
-    $date = new DateTime($weekStartDate);
-    if ($date->format('N') != 1) { // 1 means Monday
-        $statusMsg = "<div class='alert alert-danger'>The selected date must be a Monday.</div>";
-    } else {
-        // Proceed with the rest of the code
-        $mondayTime = floatval($_POST['monday_time']);
-        $tuesdayTime = floatval($_POST['tuesday_time']);
-        $wednesdayTime = floatval($_POST['wednesday_time']);
-        $thursdayTime = floatval($_POST['thursday_time']);
-        $fridayTime = floatval($_POST['friday_time']);
+          // Validate that the week start date is a Monday
+          $date = new DateTime($weekStartDate);
+          if ($date->format('N') != 1) { // 1 means Monday
+              $statusMsg = "<div class='alert alert-danger'>The selected date must be a Monday.</div>";
+          } else {
+              // Proceed with the rest of the code
+              $mondayTime = floatval($_POST['monday_time']);
+              $tuesdayTime = floatval($_POST['tuesday_time']);
+              $wednesdayTime = floatval($_POST['wednesday_time']);
+              $thursdayTime = floatval($_POST['thursday_time']);
+              $fridayTime = floatval($_POST['friday_time']);
+              $saturdayTime = floatval($_POST['saturday_time']);
 
+              // Calculate total time submitted
+              $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime;
 
+              // Check if a record already exists for the given admission number
+              $result = mysqli_query($conn, "SELECT id, remaining_time FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber'");
+              $row = mysqli_fetch_assoc($result);
 
-        // Calculate total time submitted
-        $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime;
-        
+              // Handle file upload
+              $uploadDir = '../uploads/'; // Directory to save uploaded files
+              $uploadFile = $uploadDir . basename($_FILES['photo']['name']);
+              $imageFileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
+              $uploadOk = 1;
 
-        // Check if a record already exists for the given admission number
-        $result = mysqli_query($conn, "SELECT id, remaining_time FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber'");
-        $row = mysqli_fetch_assoc($result);
+              // Check if image file is a actual image or fake image
+              $check = getimagesize($_FILES['photo']['tmp_name']);
+              if ($check === false) {
+                  $statusMsg = "<div class='alert alert-danger'>File is not an image.</div>";
+                  $uploadOk = 0;
+              }
 
-        // Handle file upload
-        $uploadDir = '../uploads/'; // Directory to save uploaded files
-        $uploadFile = $uploadDir . basename($_FILES['photo']['name']);
-        $imageFileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
-        $uploadOk = 1;
+              // Check file size (limit to 2MB)
+              if ($_FILES['photo']['size'] > 2000000) {
+                  $statusMsg = "<div class='alert alert-danger'>Sorry, your file is too large. Maximum size is 2MB.</div>";
+                  $uploadOk = 0;
+              }
 
-        // Check if image file is a actual image or fake image
-        $check = getimagesize($_FILES['photo']['tmp_name']);
-        if ($check === false) {
-            $statusMsg = "<div class='alert alert-danger'>File is not an image.</div>";
-            $uploadOk = 0;
-        }
+              // Allow certain file formats
+              if ($imageFileType != "jpg" && $imageFileType != "png") {
+                  $statusMsg = "<div class='alert alert-danger'>Sorry, only JPG and PNG files are allowed.</div>";
+                  $uploadOk = 0;
+              }
 
-        // Check file size (limit to 2MB)
-        if ($_FILES['photo']['size'] > 2000000) {
-            $statusMsg = "<div class='alert alert-danger'>Sorry, your file is too large. Maximum size is 2MB.</div>";
-            $uploadOk = 0;
-        }
+              // Check if $uploadOk is set to 0 by an error
+              if ($uploadOk == 0) {
+                  $statusMsg .= "<div class='alert alert-danger'>Your file was not uploaded.</div>";
+              } else {
+                  // If everything is ok, try to upload file
+                  if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadFile)) {
+                      $statusMsg = "<div class='alert alert-success'>The file ". htmlspecialchars(basename($_FILES['photo']['name'])). " has been uploaded.</div>";
+                  } else {
+                      $statusMsg = "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
+                  }
+              }
 
-        // Allow certain file formats
-        if ($imageFileType != "jpg" && $imageFileType != "png") {
-            $statusMsg = "<div class='alert alert-danger'>Sorry, only JPG and PNG files are allowed.</div>";
-            $uploadOk = 0;
-        }
+              // Check if a record exists for the given admission number
+              if ($row) {
+                  // If a record exists, update it
+                  $currentRemainingTime = $row['remaining_time'] ? $row['remaining_time'] : 500; // Default to 500 if no previous entries
 
-        // Check if $uploadOk is set to 0 by an error
-        if ($uploadOk == 0) {
-            $statusMsg .= "<div class='alert alert-danger'>Your file was not uploaded.</div>";
-        } else {
-            // If everything is ok, try to upload file
-            if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadFile)) {
-                $statusMsg = "<div class='alert alert-success'>The file ". htmlspecialchars(basename($_FILES['photo']['name'])). " has been uploaded.</div>";
-            } else {
-                $statusMsg = "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
-            }
-        }
+                  // Calculate new remaining time
+                  $newRemainingTime = $currentRemainingTime - $totalTimeSubmitted;
 
-        // Check if a record exists for the given admission number
-        if ($row) {
-            // If a record exists, update it
-            $currentRemainingTime = $row['remaining_time'] ? $row['remaining_time'] : 500; // Default to 500 if no previous entries
+                  if ($newRemainingTime >= 0) {
+                      // Update the existing record
+                      $updateQuery = mysqli_query($conn, "UPDATE tbl_weekly_time_entries SET week_start_date = '$weekStartDate', monday_time = '$mondayTime', tuesday_time = '$tuesdayTime', wednesday_time = '$wednesdayTime', thursday_time = '$thursdayTime', friday_time = '$fridayTime', saturday_time = '$saturdayTime', remaining_time = '$newRemainingTime', photo = '$uploadFile' WHERE id = '".$row['id']."'");
 
-            // Calculate new remaining time
-            $newRemainingTime = $currentRemainingTime - $totalTimeSubmitted;
+                      if ($updateQuery) {
+                          // Update remaining time in tblstudents
+                          mysqli_query($conn, "UPDATE tblstudents SET remaining_time = '$newRemainingTime' WHERE admissionNumber = '$admissionNumber'");
+                          $statusMsg = "<div class='alert alert-success'>Weekly time updated successfully! Remaining time: $newRemainingTime hours</div>";
+                          $_SESSION['submission_success'] = true; // Set this variable to true
+                          $_SESSION['form_submitted'] = true; // Mark the form as submitted
+                          header("Location: index.php");
+                      } else {
+                          $statusMsg = "<div class='alert alert-danger'>Error updating weekly time!</div>";
+                      }
+                  } else {
+                      $statusMsg = "<div class='alert alert-danger'>Submission exceeds the allowed total of 500 hours!</div>";
+                  }
+              } else {
+                  // If no record exists, insert a new one
+                  $newRemainingTime = 500 - $totalTimeSubmitted; // Assuming starting from 500 hours
 
-            if ($newRemainingTime >= 0) {
-                // Update the existing record
-                $updateQuery = mysqli_query($conn, "UPDATE tbl_weekly_time_entries SET week_start_date = '$weekStartDate', monday_time = '$mondayTime', tuesday_time = '$tuesdayTime', wednesday_time = '$wednesdayTime', thursday_time = '$thursdayTime', friday_time = '$fridayTime', remaining_time = '$newRemainingTime', photo = '$uploadFile' WHERE id = '".$row['id']."'");
+                  if ($newRemainingTime >= 0) {
+                      // Insert the weekly time entry into the database
+                      $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo) 
+                        VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$newRemainingTime', '$uploadFile')");
 
-                if ($updateQuery) {
-                    // Update remaining time in tblstudents
-                    mysqli_query($conn, "UPDATE tblstudents SET remaining_time = '$newRemainingTime' WHERE admissionNumber = '$admissionNumber'");
-                    $statusMsg = "<div class='alert alert-success'>Weekly time updated successfully! Remaining time: $newRemainingTime hours</div>";
-                    header("Location: time.php");
-                } else {
-                    $statusMsg = "<div class='alert alert-danger'>Error updating weekly time!</div>";
-                }
-            } else {
-                $statusMsg = "<div class='alert alert-danger'>Submission exceeds the allowed total of 500 hours!</div>";
-            }
-        } else {
-            // If no record exists, insert a new one
-            $newRemainingTime = 500 - $totalTimeSubmitted; // Assuming starting from 500 hours
-
-            if ($newRemainingTime >= 0) {
-                // Insert the weekly time entry into the database
-                $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, admissionNumber, student_fullname, course, section, comp_name, comp_link, remaining_time, photo) 
-                VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$admissionNumber', '$studentFullname', '$course', '$section', '$comp_name', '$comp_link', '$newRemainingTime', '$uploadFile')");
-
-                if ($insertQuery) {
-                    // Update remaining time in tblstudents
-                    mysqli_query($conn, "UPDATE tblstudents SET remaining_time = '$newRemainingTime' WHERE admissionNumber = '$admissionNumber'");
-                    $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Remaining time: $newRemainingTime hours</div>";
-                    header("Location: time.php");
-                } else {
-                    $statusMsg = "<div class='alert alert-danger'>Error submitting weekly time!</div>";
-                }
-            } else {
-                $statusMsg = "<div class='alert alert-danger'>Submission exceeds the allowed total of 500 hours!</div>";
-            }
-        }
-    }
+                      if ($insertQuery) {
+                          // Update remaining time in tblstudents
+                          mysqli_query($conn, "UPDATE tblstudents SET remaining_time = '$newRemainingTime' WHERE admissionNumber = '$admissionNumber'");
+                          $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Remaining time: $newRemainingTime hours</div>";
+                          $_SESSION['form_submitted'] = true; // Mark the form as submitted
+                          header("Location: index.php");
+                      } else {
+                          $statusMsg = "<div class='alert alert-danger'>Error submitting weekly time!</div>";
+                      }
+                  } else {
+                      $statusMsg = "<div class='alert alert-danger'>Submission exceeds the allowed total of 500 hours!</div>";
+                  }
+              }
+          }
+      }
+  }
 }
 ?>
 
@@ -184,6 +179,25 @@ if (isset($_POST['submit_time'])) {
   <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
   <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
   <link href="css/ruang-admin.min.css" rel="stylesheet">
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const weekStartDateInput = document.querySelector('input[name="week_start_date"]');
+        
+        // Function to set the date to the previous Monday
+        function setPreviousMonday() {
+            const today = new Date();
+            const previousMonday = new Date(today);
+            const dayOfWeek = today.getDay();
+            const daysSinceMonday = (dayOfWeek + 6) % 7; // Calculate days since last Monday
+            previousMonday.setDate(today.getDate() - daysSinceMonday);
+            weekStartDateInput.value = previousMonday.toISOString().split('T')[0]; // Set the input value to previous Monday
+        }
+
+        // Set the previous Monday on page load
+        setPreviousMonday();
+    });
+</script>
 </head>
 
 <body id="page-top">
@@ -223,7 +237,7 @@ if (isset($_POST['submit_time'])) {
                             <input type="text" class="form-control" name="admissionNumber" value="<?php echo isset($_SESSION['admissionNumber']) ? $_SESSION['admissionNumber'] : ''; ?>" required readonly>
                         </div>
                         <div class="col-xl-6">
-                          <label class="form-control-label">Select Company<span class="text-danger ml-2">*</span></label>
+                          <label class="form-control-label">Company<span class="text-danger ml-2">*</span></label>
                           <input type="text" class="form-control" name="comp_name" value="<?php echo isset($_SESSION['comp_name']) ? $_SESSION['comp_name'] : ''; ?>" required readonly>
                       </div>
                     </div>
@@ -233,18 +247,18 @@ if (isset($_POST['submit_time'])) {
                         <input type="text" class="form-control" name="student_fullname" value="<?php echo isset($_SESSION['student_fullname']) ? $_SESSION['student_fullname'] : ''; ?>" required readonly>
                     </div>
                     <div class="col-xl-6">
-                      <label class="form-control-label">Select Class<span class="text-danger ml-2">*</span></label>
-                      <input type="text" class="form-control" name="className" value="<?php echo isset($_SESSION['className']) ? $_SESSION['className'] : ''; ?>" required readonly>
+                      <label class="form-control-label">Section<span class="text-danger ml-2">*</span></label>
+                      <input type="text" class="form-control" name="course" value="<?php echo isset($_SESSION['className']) ? $_SESSION['className'] : ''; ?>" required readonly>
                   </div>
                     </div>
                     <div class="form-group row mb-3">
                     <div class="col-xl-6">
-                        <label class="form-control-label">Select Class Arm<span class="text-danger ml-2">*</span></label>
-                        <input type="text" class="form-control" name="classArmName" value="<?php echo isset($_SESSION['classArmName']) ? $_SESSION['classArmName'] : ''; ?>" required readonly>
+                        <label class="form-control-label">Company Link (Website link or Facebook Link)<span class="text-danger ml-2">*</span></label>
+                        <input type="text" class="form-control" name="comp_link" id="comp_link" value="<?php echo isset($_SESSION['comp_link']) ? $_SESSION['comp_link'] : ''; ?>" required readonly>
                     </div>
                         <div class="col-xl-6">
                             <label class="form-control-label">Week Start Date (Select Monday)<span class="text-danger ml-2">*</span></label>
-                            <input type="date" class="form-control" name="week_start_date" required>
+                            <input type="date" class="form-control" name="week_start_date" readonly>
                             <small class="form-text text-muted">Please select a Monday as the start date.</small>
                         </div>
                     </div>
@@ -274,9 +288,9 @@ if (isset($_POST['submit_time'])) {
                             <input type="number" class="form-control" name="friday_time" min="0" max="8" step="0.1" required>
                         </div>
                         <div class="col-xl-6">
-                            <label class="form-control-label">Company Link (Website link or Facebook Link)<span class="text-danger ml-2">*</span></label>
-                            <input type="text" class="form-control" name="comp_link" id="comp_link" required>
-                        </div>
+                          <label class="form-control-label">Saturday Time (in hours)<span class="text-danger ml-2">*</span></label>
+                          <input type="number" class="form-control" name="saturday_time" min="0" max="8" step="0.1" placeholder="Put Zero(0) if only Monday to Friday" required>
+                      </div>
                     </div>
                     <div class="form-group row mb-3">
                         <div class="col-xl-12">
@@ -305,7 +319,6 @@ if (isset($_POST['submit_time'])) {
                             <th>Week Start Date</th>
                             <th>Student Full Name</th>
                             <th>Course</th>
-                            <th>Section</th>
                             <th>Company</th>
                             <th>Company Link</th>
                             <th>Monday</th>
@@ -313,6 +326,7 @@ if (isset($_POST['submit_time'])) {
                             <th>Wednesday</th>
                             <th>Thursday</th>
                             <th>Friday</th>
+                            <th>Saturday</th>
                             <th>Total Hours</th>
                             <th>Remaining Time</th>
                             <th>Photo</th>
@@ -329,7 +343,7 @@ if (isset($_POST['submit_time'])) {
                             if ($num > 0) {
                                 while ($rows = $rs->fetch_assoc()) {
                                     $sn++;
-                                    $totalHours = $rows['monday_time'] + $rows['tuesday_time'] + $rows['wednesday_time'] + $rows['thursday_time'] + $rows['friday_time'];
+                                    $totalHours = $rows['monday_time'] + $rows['tuesday_time'] + $rows['wednesday_time'] + $rows['thursday_time'] + $rows['friday_time'] + $rows['saturday_time'];
                                     $remainingTime = $rows['remaining_time'];
                                     echo "
                                     <tr>
@@ -337,7 +351,6 @@ if (isset($_POST['submit_time'])) {
                                         <td>".$rows['week_start_date']."</td>
                                         <td>".$rows['student_fullname']."</td>
                                         <td>".$rows['course']."</td>
-                                        <td>".$rows['section']."</td>
                                         <td>".$rows['comp_name']."</td>
                                         <td>".$rows['comp_link']."</td>
                                         <td>".$rows['monday_time']."</td>
@@ -345,6 +358,7 @@ if (isset($_POST['submit_time'])) {
                                         <td>".$rows['wednesday_time']."</td>
                                         <td>".$rows['thursday_time']."</td>
                                         <td>".$rows['friday_time']."</td>
+                                        <td>".$rows['saturday_time']."</td>
                                         <td>".$totalHours."</td>
                                         <td>".$remainingTime."</td>
                                         <td><a href='".$rows['photo']."' target='_blank'><img src='".$rows['photo']."' alt='Uploaded Photo' style='width: 50px; height: auto;'></a></td>
@@ -396,9 +410,3 @@ if (isset($_POST['submit_time'])) {
   </script>
 </body>
 </html>
-
-
-
-
-$_SESSION['submission_success'] = true; // Set this variable to true
-    header("Location: time.php");
