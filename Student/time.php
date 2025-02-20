@@ -37,28 +37,37 @@ if (isset($_SESSION['classId'])) {
     }
 }
 
+// Reset status to 'not submitted' every Sunday
+if (date('N') == 5) { // 7 means Sunday
+    mysqli_query($conn, "UPDATE tbl_weekly_time_entries SET status = 'not submitted'");
+}
+
 // Check if the last submission date is not today, reset the submission status
 if (isset($_SESSION['last_submission_date']) && $_SESSION['last_submission_date'] !== date('Y-m-d')) {
     $_SESSION['form_submitted'] = false; // Reset the submission status
 }
 
 if (isset($_POST['submit_time'])) {
+    // Get the input values
+    $admissionNumber = $_POST['admissionNumber']; // Get the admission number
+    $studentFullname = $_POST['student_fullname'];
+    $course = $_POST['course'];
+    $weekStartDate = $_POST['week_start_date'];
+    $comp_name = $_POST['comp_name'];
+    $comp_link = $_POST['comp_link'];
+
+    // Check if a record already exists for the given admission number and week start date
+    $result = mysqli_query($conn, "SELECT id, remaining_time FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber' AND week_start_date = '$weekStartDate'");
+    $existingRecord = mysqli_fetch_assoc($result);
+
     // Check if the form has already been submitted today
-    if (isset($_SESSION['form_submitted']) && $_SESSION['form_submitted'] === true) {
-        $statusMsg = "<div class='alert alert-danger'>You have already submitted the form today.</div>";
+    if ($existingRecord) {
+        $statusMsg = "<div class='alert alert-danger'>You have already submitted the form for this week.</div>";
     } else {
         // Check if today is Sunday
-        if (date('N') != 4) { // 7 means Sunday
+        if (date('N') != 5) { // 7 means Sunday
             $statusMsg = "<div class='alert alert-danger'>The form can only be submitted on Sundays.</div>";
         } else {
-            // Get the input values
-            $admissionNumber = $_POST['admissionNumber']; // Get the admission number
-            $studentFullname = $_POST['student_fullname'];
-            $course = $_POST['course'];
-            $weekStartDate = $_POST['week_start_date'];
-            $comp_name = $_POST['comp_name'];
-            $comp_link = $_POST['comp_link'];
-
             // Validate that the week start date is a Monday
             $date = new DateTime($weekStartDate);
             if ($date->format('N') != 1) { // 1 means Monday
@@ -74,10 +83,6 @@ if (isset($_POST['submit_time'])) {
 
                 // Calculate total time submitted
                 $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime;
-
-                // Check if a record already exists for the given admission number
-                $result = mysqli_query($conn, "SELECT id, remaining_time FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber' AND week_start_date = '$weekStartDate'");
-                $row = mysqli_fetch_assoc($result);
 
                 // Handle file upload
                 $uploadDir = '../uploads/'; // Directory to save uploaded files
@@ -116,56 +121,27 @@ if (isset($_POST['submit_time'])) {
                     }
                 }
 
-                // Check if a record exists for the given admission number and week start date
-                if ($row) {
-                    // If a record exists, update it
-                    $currentRemainingTime = $row['remaining_time'] ? $row['remaining_time'] : 500; // Default to 500 if no previous entries
+                // If no record exists, insert a new one
+                $newRemainingTime = 500 - $totalTimeSubmitted; // Assuming starting from 500 hours
 
-                    // Calculate new remaining time
-                    $newRemainingTime = $currentRemainingTime - $totalTimeSubmitted;
+                if ($newRemainingTime >= 0) {
+                    // Insert the weekly time entry into the database
+                    $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo, status) 
+                        VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$newRemainingTime', '$uploadFile', 'submitted')");
 
-                    if ($newRemainingTime >= 0) {
-                        // Update the existing record
-                        $updateQuery = mysqli_query($conn, "UPDATE tbl_weekly_time_entries SET monday_time = '$mondayTime', tuesday_time = '$tuesdayTime', wednesday_time = '$wednesdayTime', thursday_time = '$thursdayTime', friday_time = '$fridayTime', saturday_time = '$saturdayTime', remaining_time = '$newRemainingTime', photo = '$uploadFile' WHERE id = '".$row['id']."'");
-
-                        if ($updateQuery) {
-                            // Update remaining time in tblstudents
-                            mysqli_query($conn, "UPDATE tblstudents SET remaining_time = '$newRemainingTime' WHERE admissionNumber = '$admissionNumber'");
-                            $statusMsg = "<div class='alert alert-success'>Weekly time updated successfully! Remaining time: $newRemainingTime hours</div>";
-                            $_SESSION['submission_success'] = true; // Set this variable to true
-                            $_SESSION['form_submitted'] = true; // Mark the form as submitted
-                            $_SESSION['last_submission_date'] = date('Y-m-d'); // Store today's date
-                            $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
-                            header("Location: index.php");
-                        } else {
-                            $statusMsg = "<div class='alert alert-danger'>Error updating weekly time!</div>";
-                        }
+                    if ($insertQuery) {
+                        // Update remaining time in tblstudents
+                        mysqli_query($conn, "UPDATE tblstudents SET remaining_time = '$newRemainingTime' WHERE admissionNumber = '$admissionNumber'");
+                        $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Remaining time: $newRemainingTime hours</div>";
+                        $_SESSION['form_submitted'] = true; // Mark the form as submitted
+                        $_SESSION['last_submission_date'] = date('Y-m-d'); // Store today's date
+                        $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
+                        header("Location: index.php");
                     } else {
-                        $statusMsg = "<div class='alert alert-danger'>Submission exceeds the allowed total of 500 hours!</div>";
+                        $statusMsg = "<div class='alert alert-danger'>Error submitting weekly time!</div>";
                     }
                 } else {
-                    // If no record exists, insert a new one
-                    $newRemainingTime = 500 - $totalTimeSubmitted; // Assuming starting from 500 hours
-
-                    if ($newRemainingTime >= 0) {
-                        // Insert the weekly time entry into the database
-                        $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo) 
-                            VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$newRemainingTime', '$uploadFile')");
-
-                        if ($insertQuery) {
-                            // Update remaining time in tblstudents
-                            mysqli_query($conn, "UPDATE tblstudents SET remaining_time = '$newRemainingTime' WHERE admissionNumber = '$admissionNumber'");
-                            $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Remaining time: $newRemainingTime hours</div>";
-                            $_SESSION['form_submitted'] = true; // Mark the form as submitted
-                            $_SESSION['last_submission_date'] = date('Y-m-d'); // Store today's date
-                            $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
-                            header("Location: index.php");
-                        } else {
-                            $statusMsg = "<div class='alert alert-danger'>Error submitting weekly time!</div>";
-                        }
-                    } else {
-                        $statusMsg = "<div class='alert alert-danger'>Submission exceeds the allowed total of 500 hours!</div>";
-                    }
+                    $statusMsg = "<div class='alert alert-danger'>Submission exceeds the allowed total of 500 hours!</div>";
                 }
             }
         }

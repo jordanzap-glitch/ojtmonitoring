@@ -1,5 +1,5 @@
 <?php
-session_start();
+error_reporting(0);
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
@@ -281,6 +281,7 @@ if (isset($_POST['submit_time'])) {
                             <th>Saturday</th>
                             <th>Total Hours</th>
                             <th>Remaining Time</th>
+                            <th>Status</th>
                             <th>Photo</th>
                             <th>Edit</th>
                             <th>Delete</th>
@@ -297,6 +298,7 @@ if (isset($_POST['submit_time'])) {
                                     $sn++;
                                     $totalHours = $rows['monday_time'] + $rows['tuesday_time'] + $rows['wednesday_time'] + $rows['thursday_time'] + $rows['friday_time'] + $rows['saturday_time']; // Include Saturday time
                                     $remainingTime = $rows['remaining_time'];
+                                    $status = $rows['status'];
                                     echo "
                                     <tr>
                                         <td>".$sn."</td>
@@ -313,6 +315,7 @@ if (isset($_POST['submit_time'])) {
                                         <td>".$rows['saturday_time']."</td> <!-- Display Saturday time -->
                                         <td>".$totalHours."</td>
                                         <td>".$remainingTime."</td>
+                                        <td>".$status."</td>
                                         <td><a href='".$rows['photo']."' target='_blank'><img src='".$rows['photo']."' alt='Uploaded Photo' style='width: 50px; height: auto;'></a></td>
                                         <td><a href='?action=edit&Id=".$rows['id']."'><i class='fas fa-fw fa-edit'></i>Edit</a></td>
                                        <td><a href='?action=delete&Id=".$rows['id']."'><i class='fas fa-fw fa-trash'></i>Delete</a></td>
