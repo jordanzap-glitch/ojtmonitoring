@@ -43,7 +43,7 @@ if (isset($_POST['login'])) {
             $_SESSION['lastName'] = $rows_teacher['lastName'];
             $_SESSION['emailAddress'] = $rows_teacher['emailAddress'];
             $_SESSION['classId'] = $rows_teacher['classId'];
-            $_SESSION['classArmId'] = $rows_teacher['classArmId'];
+            $_SESSION[''] = $rows_teacher[''];
             $_SESSION['user_type'] = 'ClassTeacher'; // Set session user type
 
             
@@ -65,7 +65,7 @@ if (isset($_POST['login'])) {
                 $_SESSION['lastName'] = $rows_student['lastName'];
                 $_SESSION['email'] = $rows_student['email'];
                 $_SESSION['classId'] = $rows_student['classId'];
-                $_SESSION['classArmId'] = $rows_student['classArmId'];
+                $_SESSION[''] = $rows_student[''];
                 $_SESSION['user_type'] = 'Student'; // Set session user type
 
                 // Redirect to student dashboard
