@@ -48,7 +48,7 @@ if (isset($_POST['submit_time'])) {
         $statusMsg = "<div class='alert alert-danger'>You have already submitted the form today.</div>";
     } else {
         // Check if today is Sunday
-        if (date('N') != 7) { // 7 means Sunday
+        if (date('N') != 4) { // 7 means Sunday
             $statusMsg = "<div class='alert alert-danger'>The form can only be submitted on Sundays.</div>";
         } else {
             // Get the input values
