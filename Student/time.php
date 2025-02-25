@@ -1,5 +1,4 @@
 <?php
-error_reporting(0);
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
@@ -38,7 +37,7 @@ if (isset($_SESSION['classId'])) {
 }
 
 // Reset status to 'not submitted' every Sunday
-if (date('N') == 5) { // 7 means Sunday
+if (date('N') == 7) { // 7 means Sunday
     mysqli_query($conn, "UPDATE tbl_weekly_time_entries SET status = 'not submitted'");
 }
 
@@ -48,104 +47,113 @@ if (isset($_SESSION['last_submission_date']) && $_SESSION['last_submission_date'
 }
 
 if (isset($_POST['submit_time'])) {
-    // Get the input values
-    $admissionNumber = $_POST['admissionNumber']; // Get the admission number
-    $studentFullname = $_POST['student_fullname'];
-    $course = $_POST['course'];
-    $weekStartDate = $_POST['week_start_date'];
-    $comp_name = $_POST['comp_name'];
-    $comp_link = $_POST['comp_link'];
+  // Get the input values
+  $admissionNumber = $_POST['admissionNumber']; // Get the admission number
+  $studentFullname = $_POST['student_fullname'];
+  $course = $_POST['course'];
+  $weekStartDate = $_POST['week_start_date'];
+  $comp_name = $_POST['comp_name'];
+  $comp_link = $_POST['comp_link'];
 
-    // Check if a record already exists for the given admission number and week start date
-    $result = mysqli_query($conn, "SELECT id, remaining_time FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber' AND week_start_date = '$weekStartDate'");
-    $existingRecord = mysqli_fetch_assoc($result);
+  // Check if today is Sunday
+  if (date('N') != 2) { // 7 means Sunday
+      $statusMsg = "<div class='alert alert-danger'>The form can only be submitted on Sundays.</div>";
+  } else {
+      // Validate that the week start date is a Monday
+      $date = new DateTime($weekStartDate);
+      if ($date->format('N') != 1) { // 1 means Monday
+          $statusMsg = "<div class='alert alert-danger'>The selected date must be a Monday.</div>";
+      } else {
+          // Proceed with the rest of the code
+          $mondayTime = floatval($_POST['monday_time']);
+          $tuesdayTime = floatval($_POST['tuesday_time']);
+          $wednesdayTime = floatval($_POST['wednesday_time']);
+          $thursdayTime = floatval($_POST['thursday_time']);
+          $fridayTime = floatval($_POST['friday_time']);
+          $saturdayTime = floatval($_POST['saturday_time']);
 
-    // Check if the form has already been submitted today
-    if ($existingRecord) {
-        $statusMsg = "<div class='alert alert-danger'>You have already submitted the form for this week.</div>";
-    } else {
-        // Check if today is Sunday
-        if (date('N') != 5) { // 7 means Sunday
-            $statusMsg = "<div class='alert alert-danger'>The form can only be submitted on Sundays.</div>";
-        } else {
-            // Validate that the week start date is a Monday
-            $date = new DateTime($weekStartDate);
-            if ($date->format('N') != 1) { // 1 means Monday
-                $statusMsg = "<div class='alert alert-danger'>The selected date must be a Monday.</div>";
-            } else {
-                // Proceed with the rest of the code
-                $mondayTime = floatval($_POST['monday_time']);
-                $tuesdayTime = floatval($_POST['tuesday_time']);
-                $wednesdayTime = floatval($_POST['wednesday_time']);
-                $thursdayTime = floatval($_POST['thursday_time']);
-                $fridayTime = floatval($_POST['friday_time']);
-                $saturdayTime = floatval($_POST['saturday_time']);
+          // Calculate total time submitted
+          $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime;
 
-                // Calculate total time submitted
-                $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime;
+          // Handle file upload
+          $uploadDir = '../uploads/'; // Directory to save uploaded files
+          $uploadFile = $uploadDir . basename($_FILES['photo']['name']);
+          $imageFileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
+          $uploadOk = 1;
 
-                // Handle file upload
-                $uploadDir = '../uploads/'; // Directory to save uploaded files
-                $uploadFile = $uploadDir . basename($_FILES['photo']['name']);
-                $imageFileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
-                $uploadOk = 1;
+          // Check if image file is a actual image or fake image
+          $check = getimagesize($_FILES['photo']['tmp_name']);
+          if ($check === false) {
+              $statusMsg = "<div class='alert alert-danger'>File is not an image.</div>";
+              $uploadOk = 0;
+          }
 
-                // Check if image file is a actual image or fake image
-                $check = getimagesize($_FILES['photo']['tmp_name']);
-                if ($check === false) {
-                    $statusMsg = "<div class='alert alert-danger'>File is not an image.</div>";
-                    $uploadOk = 0;
-                }
+          // Check file size (limit to 2MB)
+          if ($_FILES['photo']['size'] > 2000000) {
+              $statusMsg = "<div class='alert alert-danger'>Sorry, your file is too large. Maximum size is 2MB.</div>";
+              $uploadOk = 0;
+          }
 
-                // Check file size (limit to 2MB)
-                if ($_FILES['photo']['size'] > 2000000) {
-                    $statusMsg = "<div class='alert alert-danger'>Sorry, your file is too large. Maximum size is 2MB.</div>";
-                    $uploadOk = 0;
-                }
+          // Allow certain file formats
+          if ($imageFileType != "jpg" && $imageFileType != "png") {
+              $statusMsg = "<div class='alert alert-danger'>Sorry, only JPG and PNG files are allowed.</div>";
+              $uploadOk = 0;
+          }
 
-                // Allow certain file formats
-                if ($imageFileType != "jpg" && $imageFileType != "png") {
-                    $statusMsg = "<div class='alert alert-danger'>Sorry, only JPG and PNG files are allowed.</div>";
-                    $uploadOk = 0;
-                }
+          // Check if $uploadOk is set to 0 by an error
+          if ($uploadOk == 0) {
+              $statusMsg .= "<div class='alert alert-danger'>Your file was not uploaded.</div>";
+          } else {
+              // If everything is ok, try to upload file
+              if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadFile)) {
+                  $statusMsg = "<div class='alert alert-success'>The file ". htmlspecialchars(basename($_FILES['photo']['name'])). " has been uploaded.</div>";
+              } else {
+                  $statusMsg = "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
+              }
+          }
 
-                // Check if $uploadOk is set to 0 by an error
-                if ($uploadOk == 0) {
-                    $statusMsg .= "<div class='alert alert-danger'>Your file was not uploaded.</div>";
-                } else {
-                    // If everything is ok, try to upload file
-                    if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadFile)) {
-                        $statusMsg = "<div class='alert alert-success'>The file ". htmlspecialchars(basename($_FILES['photo']['name'])). " has been uploaded.</div>";
-                    } else {
-                        $statusMsg = "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
-                    }
-                }
+          // Check if an entry for the week already exists
+          $checkEntryQuery = "SELECT * FROM tbl_weekly_time_entries WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
+          $checkEntryResult = mysqli_query($conn, $checkEntryQuery);
 
-                // If no record exists, insert a new one
-                $newRemainingTime = 500 - $totalTimeSubmitted; // Assuming starting from 500 hours
+          if (mysqli_num_rows($checkEntryResult) > 0) {
+              // Entry exists, update it
+              $updateQuery = "UPDATE tbl_weekly_time_entries SET 
+                  monday_time = '$mondayTime', 
+                  tuesday_time = '$tuesdayTime', 
+                  wednesday_time = '$wednesdayTime', 
+                  thursday_time = '$thursdayTime', 
+                  friday_time = '$fridayTime', 
+                  saturday_time = '$saturdayTime', 
+                  comp_name = '$comp_name', 
+                  comp_link = '$comp_link', 
+                  photo = '$uploadFile', 
+                  status = 'pending' 
+                  WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
 
-                if ($newRemainingTime >= 0) {
-                    // Insert the weekly time entry into the database
-                    $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo, status) 
-                        VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$newRemainingTime', '$uploadFile', 'submitted')");
+              if (mysqli_query($conn, $updateQuery)) {
+                  $statusMsg = "<div class='alert alert-success'>Weekly time updated successfully! Your submission is pending approval.</div>";
+              } else {
+                  $statusMsg = "<div class='alert alert-danger'>Error updating weekly time!</div>";
+              }
+          } else {
+              // Insert a new record with status 'pending'
+              $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo, status) 
+                  VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', 500, '$uploadFile', 'pending')");
 
-                    if ($insertQuery) {
-                        // Update remaining time in tblstudents
-                        mysqli_query($conn, "UPDATE tblstudents SET remaining_time = '$newRemainingTime' WHERE admissionNumber = '$admissionNumber'");
-                        $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Remaining time: $newRemainingTime hours</div>";
-                        $_SESSION['form_submitted'] = true; // Mark the form as submitted
-                        $_SESSION['last_submission_date'] = date('Y-m-d'); // Store today's date
-                        $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
-                        header("Location: index.php");
-                    } else {
-                        $statusMsg = "<div class='alert alert-danger'>Error submitting weekly time!</div>";
-                    }
-                } else {
-                    $statusMsg = "<div class='alert alert-danger'>Submission exceeds the allowed total of 500 hours!</div>";
-                }
-            }
-        }
-    }
+              if ($insertQuery) {
+                  $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Your submission is pending approval.</div>";
+              } else {
+                  $statusMsg = "<div class='alert alert-danger'>Error submitting weekly time!</div>";
+              }
+          }
+
+          $_SESSION['form_submitted'] = true; // Mark the form as submitted
+          $_SESSION['last_submission_date'] = date('Y-m-d'); // Store today's date
+          $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
+          header("Location: index.php");
+      }
+  }
 }
 ?>
 
@@ -192,8 +200,7 @@ if (isset($_POST['submit_time'])) {
     <div id="content-wrapper" class="d-flex flex-column">
       <div id="content">
         <!-- TopBar -->
-       <?php include "Includes/topbar.php"; ?>
-        <!-- Topbar -->
+       <?php include "Includes/topbar.php";?> <!-- Topbar -->
 
         <!-- Container Fluid-->
         <div class="container-fluid" id="container-wrapper">
@@ -216,7 +223,7 @@ if (isset($_POST['submit_time'])) {
                 <div class="card-body">
                 <form method="post" enctype="multipart/form-data">
                 <div class="form-group row mb-3">
-                        <div class="col-xl-6">
+                        <div class ="col-xl-6">
                             <label class="form-control-label">Student ID (Double Check Your Student ID)<span class="text-danger ml-2">*</span></label>
                             <input type="text" class="form-control" name="admissionNumber" value="<?php echo isset($_SESSION['admissionNumber']) ? $_SESSION['admissionNumber'] : ''; ?>" required readonly>
                         </div>
@@ -242,7 +249,7 @@ if (isset($_POST['submit_time'])) {
                     </div>
                         <div class="col-xl-6">
                             <label class="form-control-label">Week Start Date (Select Monday)<span class="text-danger ml-2">*</span></label>
-                            <input type="date" class="form-control" name="week_start_date" readonly>
+                            <input type="date" class="form-control" name="week_start_date" required>
                             <small class="form-text text-muted">Please select a Monday as the start date.</small>
                         </div>
                     </div>
@@ -272,9 +279,9 @@ if (isset($_POST['submit_time'])) {
                             <input type="number" class="form-control" name="friday_time" min="0" max="8" step="0.1" required>
                         </div>
                         <div class="col-xl-6">
-                          <label class="form-control-label">Saturday Time (in hours)<span class="text-danger ml-2">*</span></label>
-                          <input type="number" class="form-control" name="saturday_time" min="0" max="8" step="0.1" placeholder="Put Zero(0) if only Monday to Friday" required>
-                      </div>
+                            <label class="form-control-label">Saturday Time (in hours)<span class="text-danger ml-2">*</span></label>
+                            <input type="number" class="form-control" name="saturday_time" min="0" max="8" step="0.1" placeholder="Put Zero(0) if only Monday to Friday" required>
+                        </div>
                     </div>
                     <div class="form-group row mb-3">
                         <div class="col-xl-12">
@@ -320,6 +327,7 @@ if (isset($_POST['submit_time'])) {
                         </thead>
                         <tbody>
                             <?php
+                            // Fetch all entries
                             $query = "SELECT * FROM tbl_weekly_time_entries";
                             $rs = $conn->query($query);
                             $num = $rs->num_rows;

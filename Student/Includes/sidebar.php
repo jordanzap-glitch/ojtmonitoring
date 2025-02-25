@@ -34,7 +34,7 @@
                     var dayOfWeek = today.getDay();
 
                     // Check if today is Sunday (0) and if the student has not submitted
-                    if (dayOfWeek === 5 && !hasSubmitted) {
+                    if (dayOfWeek === 2 && !hasSubmitted) {
                         document.write('<a class="collapse-item" href="time.php">Submit Time</a>');
                     } else if (hasSubmitted) {
                         document.write('<p class="collapse-item disabled">Submit Time (Already Submitted)</p>');

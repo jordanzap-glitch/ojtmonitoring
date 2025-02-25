@@ -48,10 +48,13 @@
         <div id="collapseBootstrapassests" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Student Time</h6>
+            <a class="collapse-item" href="approval.php">Aprroval
+            </a>
              <a class="collapse-item" href="viewtime.php">Time Table</a>
               <!-- <a class="collapse-item" href="assetsCategoryList.php">Assets Category List</a>
              <a class="collapse-item" href="createAssets.php">Create Assets</a> -->
           </div>
+          
         </div>
       </li>
        <!-- <li class="nav-item">
