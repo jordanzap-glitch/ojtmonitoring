@@ -112,6 +112,16 @@ if (isset($_POST['submit_time'])) {
               }
           }
 
+          // Fetch the remaining time from the students table
+          $remainingTimeQuery = "SELECT remaining_time FROM tblstudents WHERE admissionNumber = '$admissionNumber'";
+          $remainingTimeResult = mysqli_query($conn, $remainingTimeQuery);
+          $remainingTime = 500; // Default remaining time if no previous entry found
+
+          if (mysqli_num_rows($remainingTimeResult) > 0) {
+              $remainingRow = mysqli_fetch_assoc($remainingTimeResult);
+              $remainingTime = $remainingRow['remaining_time'];
+          }
+
           // Check if an entry for the week already exists
           $checkEntryQuery = "SELECT * FROM tbl_weekly_time_entries WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
           $checkEntryResult = mysqli_query($conn, $checkEntryQuery);
@@ -128,7 +138,8 @@ if (isset($_POST['submit_time'])) {
                   comp_name = '$comp_name', 
                   comp_link = '$comp_link', 
                   photo = '$uploadFile', 
-                  status = 'pending' 
+                  status = 'pending', 
+                  remaining_time = '$remainingTime' 
                   WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
 
               if (mysqli_query($conn, $updateQuery)) {
@@ -139,7 +150,7 @@ if (isset($_POST['submit_time'])) {
           } else {
               // Insert a new record with status 'pending'
               $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo, status) 
-                  VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', 500, '$uploadFile', 'pending')");
+                  VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', '$uploadFile', 'pending')");
 
               if ($insertQuery) {
                   $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Your submission is pending approval.</div>";

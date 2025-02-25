@@ -43,7 +43,7 @@
                     }
                 </script>
                 <a class="collapse-item" href="ViewTask.php">Task List</a>
-                <a class="collapse-item" href="ViewTaskHistory.php">Submission History</a>
+                <a class="collapse-item" href="dtrhistory.php">DTR History</a>
             </div>
         </div>
     </li>

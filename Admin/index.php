@@ -2,19 +2,22 @@
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
+// Fetch the count of pending DTR submissions
+$queryPendingDTR = "SELECT COUNT(*) as pendingCount FROM tbl_weekly_time_entries WHERE status = 'pending'";
+$resultPendingDTR = $conn->query($queryPendingDTR);
+$rowPendingDTR = $resultPendingDTR->fetch_assoc();
+$pendingDTRCount = $rowPendingDTR['pendingCount'];
 
+// Fetch class and arm information
+$query = "SELECT tblclass.className, tblclassarms.classArmName 
+FROM tblclassteacher
+INNER JOIN tblclass ON tblclass.Id = tblclassteacher.classId
+INNER JOIN tblclassarms ON tblclassarms.Id = tblclassteacher.classArmId
+WHERE tblclassteacher.Id = '$_SESSION[userId]'";
 
-    $query = "SELECT tblclass.className,tblclassarms.classArmName 
-    FROM tblclassteacher
-    INNER JOIN tblclass ON tblclass.Id = tblclassteacher.classId
-    INNER JOIN tblclassarms ON tblclassarms.Id = tblclassteacher.classArmId
-    Where tblclassteacher.Id = '$_SESSION[userId]'";
-
-    $rs = $conn->query($query);
-    $num = $rs->num_rows;
-    $rrw = $rs->fetch_assoc();
-
-
+$rs = $conn->query($query);
+$num = $rs->num_rows;
+$rrw = $rs->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -36,12 +39,12 @@ include '../Includes/dbcon.php';
 <body id="page-top">
   <div id="wrapper">
     <!-- Sidebar -->
-   <?php include "Includes/sidebar.php";?>
+    <?php include "Includes/sidebar.php"; ?>
     <!-- Sidebar -->
     <div id="content-wrapper" class="d-flex flex-column">
       <div id="content">
         <!-- TopBar -->
-           <?php include "Includes/topbar.php";?>
+        <?php include "Includes/topbar.php"; ?>
         <!-- Topbar -->
         <!-- Container Fluid-->
         <div class="container-fluid" id="container-wrapper">
@@ -54,22 +57,18 @@ include '../Includes/dbcon.php';
           </div>
 
           <div class="row mb-3">
-          <!-- Students Card -->
-          <?php 
-$query1=mysqli_query($conn,"SELECT * from tblstudents");                       
-$students = mysqli_num_rows($query1);
-?>
+            <!-- Students Card -->
+            <?php 
+            $query1 = mysqli_query($conn, "SELECT * from tblstudents");                       
+            $students = mysqli_num_rows($query1);
+            ?>
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card h-100">
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-uppercase mb-1">Students</div>
-                      <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"><?php echo $students;?></div>
-                      <div class="mt-2 mb-0 text-muted text-xs">
-                        <!-- <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> 20.4%</span>
-                        <span>Since last month</span> -->
-                      </div>
+                      <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"><?php echo $students; ?></div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-users fa-2x text-info"></i>
@@ -78,22 +77,19 @@ $students = mysqli_num_rows($query1);
                 </div>
               </div>
             </div>
-            <!-- Class Card -->
-             <?php 
-$query1=mysqli_query($conn,"SELECT * from tblenroll");                       
-$class = mysqli_num_rows($query1);
-?>
+
+            <!-- Enrolled Interns Card -->
+            <?php 
+            $query1 = mysqli_query($conn, "SELECT * from tblenroll");                       
+            $class = mysqli_num_rows($query1);
+            ?>
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card h-100">
                 <div class="card-body">
                   <div class="row align-items-center">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-uppercase mb-1">Enrolled Interns</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $class;?></div>
-                      <div class="mt-2 mb-0 text-muted text-xs">
-                        <!-- <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
-                        <span>Since last month</span> -->
-                      </div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $class; ?></div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-chalkboard fa-2x text-primary"></i>
@@ -102,51 +98,40 @@ $class = mysqli_num_rows($query1);
                 </div>
               </div>
             </div>
-            
-            
 
-            <!-- Teachers Card  -->
+            <!-- Total Coordinators Card -->
             <?php 
-            $query1=mysqli_query($conn,"SELECT * from tblclassteacher");                       
+            $query1 = mysqli_query($conn, "SELECT * from tblclassteacher");                       
             $classTeacher = mysqli_num_rows($query1);
             ?>
-                        <div class="col-xl-3 col-md-6 mb-4">
-                          <div class="card h-100">
-                            <div class="card-body">
-                              <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                  <div class="text-xs font-weight-bold text-uppercase mb-1">Total Coordinators</div>
-                                  <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $classTeacher;?></div>
-                                  <div class="mt-2 mb-0 text-muted text-xs">
-                                    <!-- <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> 12%</span>
-                                    <span>Since last years</span> -->
-                                  </div>
-                                </div>
-                                <div class="col-auto">
-                                  <i class="fas fa-chalkboard-teacher fa-2x text-danger"></i>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-uppercase mb-1">Total Coordinators</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $classTeacher; ?></div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-chalkboard-teacher fa-2x text-danger"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                        
-            <!-- Std Att Card  -->
+            <!-- Total Companies Card -->
             <?php 
-$query1=mysqli_query($conn,"SELECT * from tblcompany");                       
-$totAttendance = mysqli_num_rows($query1);
-?>
+            $query1 = mysqli_query($conn, "SELECT * from tblcompany");                       
+            $totAttendance = mysqli_num_rows($query1);
+            ?>
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card h-100">
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-uppercase mb-1">Total Companies</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $totAttendance;?></div>
-                      <div class="mt-2 mb-0 text-muted text-xs">
-                        <!-- <span class="text-danger mr-2"><i class="fas fa-arrow-down"></i> 1.10%</span>
-                        <span>Since yesterday</span> -->
-                      </div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $totAttendance; ?></div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-calendar fa-2x text-secondary"></i>
@@ -155,21 +140,34 @@ $totAttendance = mysqli_num_rows($query1);
                 </div>
               </div>
             </div>
-          
-          <!--Row-->
 
-          <!-- <div class="row">
-            <div class="col-lg-12 text-center">
-              <p>Do you like this template ? you can download from <a href="https://github.com/indrijunanda/RuangAdmin"
-                  class="btn btn-primary btn-sm" target="_blank"><i class="fab fa-fw fa-github"></i>&nbsp;GitHub</a></p>
-            </div>
-          </div> -->
+            <!-- Pending DTR Card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                  <a href="approval.php" style="text-decoration: none; color: inherit;"> <!-- Make the card clickable -->
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                          <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Pending DTR</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $pendingDTRCount; ?></div>
+                          </div>
+                          <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+
+          </div>
+          <!--Row-->
 
         </div>
         <!---Container Fluid-->
       </div>
       <!-- Footer -->
-      
+      <?php include "Includes/footer.php"; ?>
       <!-- Footer -->
     </div>
   </div>
