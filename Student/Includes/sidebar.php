@@ -29,21 +29,13 @@
                     // Assuming you have a way to check if the student has submitted their time
                     var hasSubmitted = <?php echo isset($_SESSION['form_submitted']) && $_SESSION['form_submitted'] === true ? 'true' : 'false'; ?>;
 
-                    // Get the current day of the week (0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday)
-                    var today = new Date();
-                    var dayOfWeek = today.getDay();
-
-                    // Check if today is Sunday (0) and if the student has not submitted
-                    if (dayOfWeek === 2 && !hasSubmitted) {
+                    // Always show the "Submit Time" link
+                    if (!hasSubmitted) {
                         document.write('<a class="collapse-item" href="time.php">Submit Time</a>');
-                    } else if (hasSubmitted) {
-                        document.write('<p class="collapse-item disabled">Submit Time (Already Submitted)</p>');
                     } else {
-                        document.write('<p class="collapse-item disabled">Submit Time (Only on Sundays)</p>');
+                        document.write('<p class="collapse-item disabled">Submit Time (Already Submitted)</p>');
                     }
                 </script>
-                <a class="collapse-item" href="ViewTask.php">Task List</a>
-                <a class="collapse-item" href="dtrhistory.php">DTR History</a>
             </div>
         </div>
     </li>

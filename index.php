@@ -64,12 +64,12 @@ if (isset($_POST['login'])) {
                 $_SESSION['lastName'] = $rows_student['lastName'];
                 $_SESSION['email'] = $rows_student['email'];
                 $_SESSION['classId'] = $rows_student['classId'];
-                $_SESSION['user_type'] = 'Student'; // Set session user type
+                $_SESSION['user_type'] = 'Student';
+                $_SESSION['admissionNumber'] = $userAdmissionNumber; // Set session user type
 
                 // Redirect to student dashboard
-                echo "<script type='text/javascript'>
-                window.location = 'Student/index.php';
-                </script>";
+                header('Location:Student/index.php');
+            exit();
             } 
             else {
                 // Invalid username or password

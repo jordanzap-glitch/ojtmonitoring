@@ -1,5 +1,5 @@
 <?php 
-error_reporting(0);
+;
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
@@ -9,10 +9,10 @@ include '../Includes/dbcon.php';
 if(isset($_POST['save'])){
     
     $sessionName=$_POST['sessionName'];
-    $termId=$_POST['termId'];
+    
     $dateCreated = date("Y-m-d");
    
-    $query=mysqli_query($conn,"select * from tblsessionterm where sessionName ='$sessionName' and termId = '$termId'");
+    $query=mysqli_query($conn,"select * from tblsessionterm where sessionName ='$sessionName'");
     $ret=mysqli_fetch_array($query);
 
     if($ret > 0){ 
@@ -21,7 +21,7 @@ if(isset($_POST['save'])){
     }
     else{
 
-        $query=mysqli_query($conn,"insert into tblsessionterm(sessionName,termId,isActive,dateCreated) value('$sessionName','$termId','0','$dateCreated')");
+        $query=mysqli_query($conn,"insert into tblsessionterm(sessionName,isActive,dateCreated) value('$sessionName','0','$dateCreated')");
 
     if ($query) {
         
@@ -55,10 +55,10 @@ if(isset($_POST['save'])){
         if(isset($_POST['update'])){
     
              $sessionName=$_POST['sessionName'];
-    $termId=$_POST['termId'];
+   
     $dateCreated = date("Y-m-d");
         
-            $query=mysqli_query($conn,"update tblsessionterm set sessionName='$sessionName',termId='$termId',isActive='0' where Id='$Id'");
+            $query=mysqli_query($conn,"update tblsessionterm set sessionName='$sessionName',isActive='0' where Id='$Id'");
 
             if ($query) {
                 
@@ -182,20 +182,7 @@ if(isset($_POST['save'])){
                       <input type="text" class="form-control" name="sessionName" value="<?php echo $row['sessionName'];?>" id="exampleInputFirstName" placeholder="Session">
                         </div>
                         <div class="col-xl-6">
-                            <label class="form-control-label">Term<span class="text-danger ml-2">*</span></label>
-                              <?php
-                        $qry= "SELECT * FROM tblterm ORDER BY termName ASC";
-                        $result = $conn->query($qry);
-                        $num = $result->num_rows;		
-                        if ($num > 0){
-                          echo ' <select required name="termId" class="form-control mb-3">';
-                          echo'<option value="">--Select Tern--</option>';
-                          while ($rows = $result->fetch_assoc()){
-                          echo'<option value="'.$rows['Id'].'" >'.$rows['termName'].'</option>';
-                              }
-                                  echo '</select>';
-                              }
-                            ?>  
+                          
                         </div>
                     </div>
                       <?php
@@ -229,7 +216,6 @@ if(isset($_POST['save'])){
                       <tr>
                         <th>#</th>
                         <th>Session</th>
-                        <th>Term</th>
                         <th>Status</th>
                         <th>Date</th>
                         <th>Activate</th>
@@ -240,11 +226,8 @@ if(isset($_POST['save'])){
                   
                     <tbody>
 
-                  <?php
-                      $query = "SELECT tblsessionterm.Id,tblsessionterm.sessionName,tblsessionterm.isActive,tblsessionterm.dateCreated,
-                      tblterm.termName
-                      FROM tblsessionterm
-                      INNER JOIN tblterm ON tblterm.Id = tblsessionterm.termId";
+                    <?php
+                      $query = "SELECT Id, sessionName, isActive, dateCreated FROM tblsessionterm";
                       $rs = $conn->query($query);
                       $num = $rs->num_rows;
                       $sn=0;
@@ -252,16 +235,15 @@ if(isset($_POST['save'])){
                       { 
                         while ($rows = $rs->fetch_assoc())
                           {
-                            if($rows['isActive'] == '1'){$status = "Active";}else{$status = "InActive";}
-                             $sn = $sn + 1;
+                            $status = ($rows['isActive'] == '1') ? "Active" : "InActive";
+                             $sn++;
                             echo"
                               <tr>
                                 <td>".$sn."</td>
                                 <td>".$rows['sessionName']."</td>
-                                <td>".$rows['termName']."</td>
                                 <td>".$status."</td>
                                 <td>".$rows['dateCreated']."</td>
-                                 <td><a href='?action=activate&Id=".$rows['Id']."'><i class='fas fa-fw fa-check'></i></a></td>
+                                <td><a href='?action=activate&Id=".$rows['Id']."'><i class='fas fa-fw fa-check'></i></a></td>
                                 <td><a href='?action=edit&Id=".$rows['Id']."'><i class='fas fa-fw fa-edit'></i></a></td>
                                 <td><a href='?action=delete&Id=".$rows['Id']."'><i class='fas fa-fw fa-trash'></i></a></td>
                               </tr>";

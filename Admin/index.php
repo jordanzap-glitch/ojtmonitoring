@@ -78,47 +78,9 @@ $rrw = $rs->fetch_assoc();
               </div>
             </div>
 
-            <!-- Enrolled Interns Card -->
-            <?php 
-            $query1 = mysqli_query($conn, "SELECT * from tblenroll");                       
-            $class = mysqli_num_rows($query1);
-            ?>
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="row align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-uppercase mb-1">Enrolled Interns</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $class; ?></div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-chalkboard fa-2x text-primary"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+       
             <!-- Total Coordinators Card -->
-            <?php 
-            $query1 = mysqli_query($conn, "SELECT * from tblclassteacher");                       
-            $classTeacher = mysqli_num_rows($query1);
-            ?>
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-uppercase mb-1">Total Coordinators</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $classTeacher; ?></div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-chalkboard-teacher fa-2x text-danger"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        
 
             <!-- Total Companies Card -->
             <?php 

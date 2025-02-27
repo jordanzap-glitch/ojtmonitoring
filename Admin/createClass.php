@@ -142,7 +142,7 @@ if(isset($_POST['save'])){
                   <form method="post">
                     <div class="form-group row mb-3">
                         <div class="col-xl-6">
-                            <label class="form-control-label">Course Code<span class="text-danger ml-2">*</span></label>
+                            <label class="form-control-label">Course and Section<span class="text-danger ml-2">*</span></label>
                       <input type="text" class="form-control" name="className" value="<?php echo $row['className'];?>" id="exampleInputFirstName" placeholder="Course">
                         </div>
                     </div>

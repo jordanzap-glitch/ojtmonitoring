@@ -18,15 +18,14 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['Id'])) {
     }
 }
 
-
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['Id'])) {
-  $deleteId = $_GET['Id'];
-  $deleteQuery = "DELETE FROM tbl_weekly_time_entries WHERE id = '$deleteId'";
-  if (mysqli_query($conn, $deleteQuery)) {
-      $statusMsg = "<div class='alert alert-success'>Record deleted successfully!</div>";
-  } else {
-      $statusMsg = "<div class='alert alert-danger'>Error deleting record!</div>";
-  }
+    $deleteId = $_GET['Id'];
+    $deleteQuery = "DELETE FROM tbl_weekly_time_entries WHERE id = '$deleteId'";
+    if (mysqli_query($conn, $deleteQuery)) {
+        $statusMsg = "<div class='alert alert-success'>Record deleted successfully!</div>";
+    } else {
+        $statusMsg = "<div class='alert alert-danger'>Error deleting record!</div>";
+    }
 }
 
 if (isset($_POST['submit_time'])) {
@@ -37,6 +36,7 @@ if (isset($_POST['submit_time'])) {
     $weekStartDate = $_POST['week_start_date'];
     $comp_name = $_POST['comp_name'];
     $comp_link = $_POST['comp_link'];
+    $sessionId = $_POST['sessionId']; // Get the session ID
 
     // Validate that the week start date is a Monday
     $date = new DateTime($weekStartDate);
@@ -94,7 +94,7 @@ if (isset($_POST['submit_time'])) {
         }
 
         // Prepare the update query
-        $updateQuery = "UPDATE tbl_weekly_time_entries SET week_start_date = '$weekStartDate', monday_time = '$mondayTime', tuesday_time = '$tuesdayTime', wednesday_time = '$wednesdayTime', thursday_time = '$thursdayTime', friday_time = '$fridayTime', saturday_time = '$saturdayTime'";
+        $updateQuery = "UPDATE tbl_weekly_time_entries SET week_start_date = '$weekStartDate', monday_time = '$mondayTime', tuesday_time = '$tuesdayTime', wednesday_time = '$wednesdayTime', thursday_time = '$thursdayTime', friday_time = '$fridayTime', saturday_time = '$saturdayTime', sessionId = '$sessionId'";
 
         // If a new photo was uploaded, include it in the update query
         if (isset($_FILES['photo']) && $_FILES['photo']['error'] != UPLOAD_ERR_NO_FILE) {
@@ -281,6 +281,7 @@ if (isset($_POST['submit_time'])) {
                             <th>Saturday</th>
                             <th>Total Hours</th>
                             <th>Remaining Time</th>
+                            <th>Session</th>
                             <th>Status</th>
                             <th>Photo</th>
                             <th>Edit</th>
@@ -289,7 +290,8 @@ if (isset($_POST['submit_time'])) {
                         </thead>
                         <tbody>
                             <?php
-                            $query = "SELECT * FROM tbl_weekly_time_entries";
+                            // Updated query to join with tblsessionterm
+                            $query = "SELECT w.*, s.sessionName FROM tbl_weekly_time_entries w JOIN tblsessionterm s ON w.sessionId = s.id";
                             $rs = $conn->query($query);
                             $num = $rs->num_rows;
                             $sn = 0;
@@ -315,6 +317,7 @@ if (isset($_POST['submit_time'])) {
                                         <td>".$rows['saturday_time']."</td> <!-- Display Saturday time -->
                                         <td>".$totalHours."</td>
                                         <td>".$remainingTime."</td>
+                                        <td>".$rows['sessionName']."</td> <!-- Display sessionName -->
                                         <td>".$status."</td>
                                         <td><a href='".$rows['photo']."' target='_blank'><img src='".$rows['photo']."' alt='Uploaded Photo' style='width: 50px; height: auto;'></a></td>
                                         <td><a href='?action=edit&Id=".$rows['id']."'><i class='fas fa-fw fa-edit'></i>Edit</a></td>
@@ -322,7 +325,7 @@ if (isset($_POST['submit_time'])) {
                                     </tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='14' class='text-center'>No Record Found!</td></tr>";
+                                echo "<tr><td colspan='15' class='text-center'>No Record Found!</td></tr>";
                             }
                             ?>
                         </tbody>
