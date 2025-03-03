@@ -290,7 +290,6 @@ if (isset($_POST['submit_time'])) {
                         </thead>
                         <tbody>
                             <?php
-                            // Updated query to join with tblsessionterm
                             $query = "SELECT w.*, s.sessionName FROM tbl_weekly_time_entries w JOIN tblsessionterm s ON w.sessionId = s.id";
                             $rs = $conn->query($query);
                             $num = $rs->num_rows;

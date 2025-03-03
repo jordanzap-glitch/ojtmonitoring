@@ -195,8 +195,8 @@ if (isset($_GET['editId'])) {
                                                     ?>  
                                                 </div>
                                                 <div class="col-xl-6">                                           
-                                                    <label class="form-control-label">Company Link<span class="text-danger ml-2">*</span></label>
-                                                    <input type="text" class="form-control" name="comp_link" value="<?php echo isset($studentData) ? $studentData['comp_link'] : ''; ?>" required>
+                                                    <label class="form-control-label">Company Link (Optional)<span class="text-danger ml-2"></span></label>
+                                                    <input type="text" class="form-control" name="comp_link" value="<?php echo isset($studentData) ? $studentData['comp_link'] : ''; ?>">
                                                 </div>
                                             </div>
 

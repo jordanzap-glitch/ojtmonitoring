@@ -243,8 +243,8 @@ if (isset($_POST['submit_time'])) {
                     </div>
                     <div class="form-group row mb-3">
                     <div class="col-xl-6">
-                        <label class="form-control-label">Company Link (Website link or Facebook Link)<span class="text-danger ml-2">*</span></label>
-                        <input type="text" class="form-control" name="comp_link" id="comp_link" value="<?php echo isset($_SESSION['comp_link']) ? $_SESSION['comp_link'] : ''; ?>" required readonly>
+                        <label class="form-control-label">Company Link (Optional)<span class="text-danger ml-2">*</span></label>
+                        <input type="text" class="form-control" name="comp_link" id="comp_link" value="<?php echo isset($_SESSION['comp_link']) ? $_SESSION['comp_link'] : ''; ?>" readonly>
                     </div>
                         <div class="col-xl-6">
                             <label class="form-control-label">Week Start Date (Select Monday)<span class="text-danger ml-2">*</span></label>

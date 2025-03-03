@@ -20,7 +20,7 @@ if(isset($_POST['save'])){
 
     if($ret > 0){ 
 
-        $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>This Class Already Exists!</div>";
+        $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>This Company Already Exists!</div>";
     }
     else{
 
@@ -164,7 +164,7 @@ if (isset($_GET['Id']) && isset($_GET['action']) && $_GET['action'] == "delete")
                     <div class="col-xl-6">
                             <label class="form-control-label">Contact Number<span class="text-danger ml-2">*</span></label>
                             <input type="text" class="form-control" name="contact_num" value="<?php echo $row['contact_num'];?>" id="exampleInputFirstName">
-                            <label class="form-control-label">Company Link<span class="text-danger ml-2">*</span></label>
+                            <label class="form-control-label">Company Link (Optional)<span class="text-danger ml-2"></span></label>
                             <input type="text" class="form-control" name="comp_link" value="<?php echo $row['contact_num'];?>" id="exampleInputFirstName">
                         </div>
 
