@@ -39,4 +39,15 @@
             </div>
         </div>
     </li>
+
+    <hr class="sidebar-divider">
+    <div class="sidebar-heading">
+        Account Settings
+    </div>
+    <li class="nav-item">
+        <a class="nav-link" href="changepass.php">
+            <i class="fas fa-fw fa-lock"></i>
+            <span>Change Password</span>
+        </a>
+    </li>
 </ul>
