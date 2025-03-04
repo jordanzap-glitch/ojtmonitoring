@@ -86,6 +86,8 @@ if (isset($_GET['Id']) && isset($_GET['action']) && $_GET['action'] == "delete")
     }
 }
 
+
+
 if (isset($_GET['editId'])) {
   $editId = $_GET['editId'];
   $query = mysqli_query($conn, "SELECT * FROM tblstudents WHERE Id='$editId'");
@@ -109,34 +111,6 @@ if (isset($_GET['editId'])) {
   <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
   <link href="css/ruang-admin.min.css" rel="stylesheet">
 
-  <style>
-    /* Custom styles for the datalist dropdown */
-    input[list] {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        font-size: 1rem;
-    }
-
-    datalist {
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        background-color: white;
-        z-index: 1000;
-    }
-
-    datalist option {
-        padding: 10px;
-        cursor: pointer;
-    }
-
-    datalist option:hover {
-        background-color: #f8f9fa;
-    }
-  </style>
 
   <script>
     function classArmDropdown(str) {
@@ -203,28 +177,28 @@ if (isset($_GET['editId'])) {
                                           
                                         </div>
                                         <div class="form-group row mb-3">
-                                            <div class="col-xl-6">
-                                                <label class="form-control-label">Select Company<span class="text-danger ml-2">*</span></label>
-                                                <?php
-                                                $qry = "SELECT * FROM tblcompany ORDER BY comp_name ASC";
-                                                $result = $conn->query($qry);
-                                                $num = $result->num_rows;		
-                                                if ($num > 0) {
-                                                    echo '<input list="companies" name="comp_name" class="form-control mb-3" placeholder="Type or select a company..." required>';
-                                                    echo '<datalist id="companies">';
-                                                    while ($rows = $result->fetch_assoc()) {
-                                                        $selected = (isset($studentData) && $studentData['comp_name'] == $rows['comp_name']) ? 'selected' : '';
-                                                        echo '<option value="' . $rows['comp_name'] . '" ' . $selected . '>' . $rows['comp_name'] . '</option>';
+                                                <div class="col-xl-6">
+                                                    <label class="form-control-label">Select Company<span class="text-danger ml-2">*</span></label>
+                                                    <?php
+                                                    $qry = "SELECT * FROM tblcompany ORDER BY comp_name ASC";
+                                                    $result = $conn->query($qry);
+                                                    $num = $result->num_rows;		
+                                                    if ($num > 0) {
+                                                        echo '<select required name="comp_name" class="form-control mb-3">';
+                                                        echo '<option value="">--Select Company--</option>';
+                                                        while ($rows = $result->fetch_assoc()) {
+                                                            $selected = (isset($studentData) && $studentData['comp_name'] == $rows['comp_name']) ? 'selected' : '';
+                                                            echo '<option value="' . $rows['comp_name'] . '" ' . $selected . '>' . $rows['comp_name'] . '</option>';
+                                                        }
+                                                        echo '</select>';
                                                     }
-                                                    echo '</datalist>';
-                                                }
-                                                ?>  
+                                                    ?>  
+                                                </div>
+                                                <div class="col-xl-6">                                           
+                                                    <label class="form-control-label">Company Link (Optional)<span class="text-danger ml-2"></span></label>
+                                                    <input type="text" class="form-control" name="comp_link" value="<?php echo isset($studentData) ? $studentData['comp_link'] : ''; ?>">
+                                                </div>
                                             </div>
-                                            <div class="col-xl-6">                                           
-                                                <label class="form-control-label">Company Link (Optional)<span class="text-danger ml-2"></span></label>
-                                                <input type="text" class="form-control" name="comp_link" value="<?php echo isset($studentData) ? $studentData['comp_link'] : ''; ?>">
-                                            </div>
-                                        </div>
 
                                         <div class="form-group row mb-3">
                                             <div class="col-xl-6">
@@ -281,6 +255,8 @@ if (isset($_GET['editId'])) {
                                             <label class="form-control-label">Password <span class="text-danger ml-2">*</span></label>
                                                 <input type="password" class="form-control" name="password" value="<?php echo isset($studentData) ? $studentData['password'] : ''; ?>" required>
                                             </div>
+                                           
+                                               
                                         </div>
 
                                         <button type="submit" name="<?php echo isset($studentData) ? 'update' : 'save'; ?>" class="btn btn-primary"><?php echo isset($studentData) ? 'Update' : 'Save'; ?></button>
