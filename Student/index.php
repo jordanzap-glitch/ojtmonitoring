@@ -54,29 +54,6 @@ $remainingTime = $rrw['remaining_time']; // Get remaining time from the fetched 
           </div>
 
           <div class="row mb-3">
-            <!-- New User Card Example -->
-            <?php 
-            $query1 = mysqli_query($conn, "SELECT * FROM tbltask WHERE Stat = 'Pending'");                       
-            $students = mysqli_num_rows($query1);
-            ?>
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-uppercase mb-1">Task</div>
-                      <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"><?php echo $students; ?></div>
-                      <div class="mt-2 mb-0 text-muted text-xs">
-                      </div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-users fa-2x text-info"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Remaining Time Card Example -->
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card h-100">
