@@ -7,18 +7,18 @@ include '../Includes/dbcon.php';
 
 if(isset($_POST['save'])){
   
-    $admissionNumber=$_POST['admissionNumber'];
-    $firstName=$_POST['firstName'];
-    $lastName=$_POST['lastName'];
-    $classId=$_POST['classId'];
-    $contact=$_POST['contact'];
-    $email=$_POST['email'];
-    $address=$_POST['address'];
-    $company=$_POST['comp_name'];
-    $remaining_time=$_POST['remaining_time'];
+    $admissionNumber = $_POST['admissionNumber'];
+    $firstName = $_POST['firstName'];
+    $lastName = $_POST['lastName'];
+    $classId = $_POST['classId'];
+    $contact = $_POST['contact'];
+    $email = $_POST['email'];
+    $address = $_POST['address'];
+    $company = $_POST['comp_name'];
+    $remaining_time = $_POST['remaining_time'];
     $comp_link = $_POST['comp_link'];
     
-    $password=$_POST['password'];
+    $password = $_POST['password'];
     $sampPass_2 = ($password);
   
     $dateCreated = date("Y-m-d");
@@ -26,29 +26,30 @@ if(isset($_POST['save'])){
     $usertype = $_POST['user_type'];
     $usernew = "Student";
      
-    $query=mysqli_query($conn,"select * from tblstudents where admissionNumber ='$admissionNumber'");
-    $query1=mysqli_query($conn,"select * from tbluser where emailAddress ='$email'");
+    $query = mysqli_query($conn, "SELECT * FROM tblstudents WHERE admissionNumber ='$admissionNumber'");
+    $query1 = mysqli_query($conn, "SELECT * FROM tbluser WHERE emailAddress ='$email'");
   
-    $ret=mysqli_fetch_array($query);
+    $ret = mysqli_fetch_array($query);
   
-    if($ret > 0){ 
-        $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>This Email Address Already Exists!</div>";
+    if ($ret > 0) { 
+        $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>This Admission Number Already Exists!</div>";
     } else {
-        $query=mysqli_query($conn,"insert into tblstudents(admissionNumber,firstName,lastName,classId,contact,email,address,comp_name,password,dateCreated, remaining_time, comp_link) 
-        value('$admissionNumber','$firstName','$lastName','$classId','$contact','$email','$address','$company','$sampPass_2','$dateCreated','$remaining_time', '$comp_link')");
+        $query = mysqli_query($conn, "INSERT INTO tblstudents(admissionNumber, firstName, lastName, classId, contact, email, address, comp_name, password, dateCreated, remaining_time, comp_link) 
+        VALUES ('$admissionNumber', '$firstName', '$lastName', '$classId', '$contact', '$email', '$address', '$company', '$sampPass_2', '$dateCreated', '$remaining_time', '$comp_link')");
   
-        $query1=mysqli_query($conn,"INSERT into tbluser(emailAddress,password, user_type) 
-        value('$email','$sampPass_2','$usernew')");
+        $query1 = mysqli_query($conn, "INSERT INTO tbluser(emailAddress, password, user_type) 
+        VALUES ('$email', '$sampPass_2', '$usernew')");
       
-        if ($query) {
-            $statusMsg = "<div class='alert alert-success'  style='margin-right:700px;'>Created Successfully!</div>";
+        if ($query && $query1) {
+            $statusMsg = "<div class='alert alert-success' style='margin-right:700px;'>Created Successfully!</div>";
         } else {
             $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>An error Occurred!</div>";
         }
     }
-  }
+}
+
 //-------update---
-if(isset($_POST['update'])){
+if (isset($_POST['update'])) {
     $Id = $_POST['Id'];
     $admissionNumber = $_POST['admissionNumber'];
     $firstName = $_POST['firstName'];
@@ -62,36 +63,39 @@ if(isset($_POST['update'])){
     $comp_link = $_POST['comp_link'];
     $password = $_POST['password'];
   
+    // Update the student details
     $query = mysqli_query($conn, "UPDATE tblstudents SET admissionNumber='$admissionNumber', firstName='$firstName', lastName='$lastName', classId='$classId', contact='$contact', email='$email', address='$address', comp_name='$company', password='$password', remaining_time='$remaining_time', comp_link='$comp_link' WHERE Id='$Id'");
   
-    if ($query) {
+    // Update the user details
+    $query1 = mysqli_query($conn, "UPDATE tbluser SET emailAddress='$email', password='$password' WHERE emailAddress='$email'");
+  
+    if ($query && $query1) {
         $statusMsg = "<div class='alert alert-success' style='margin-right:700px;'>Updated Successfully!</div>";
     } else {
         $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>An error Occurred!</div>";
     }
- }
+}
+
 //--------------------------------DELETE------------------------------------------------------------------
 
 if (isset($_GET['Id']) && isset($_GET['action']) && $_GET['action'] == "delete") {
-    $Id= $_GET['Id'];
-    $query = mysqli_query($conn,"DELETE FROM tblstudents WHERE Id='$Id'");
-    $query1 = mysqli_query($conn,"DELETE FROM tbluser WHERE emailAddress='$email'");
+    $Id = $_GET['Id'];
+    $query = mysqli_query($conn, "DELETE FROM tblstudents WHERE Id='$Id'");
+    $query1 = mysqli_query($conn, "DELETE FROM tbluser WHERE emailAddress=(SELECT email FROM tblstudents WHERE Id='$Id')");
 
-    if ($query == TRUE) {
-        echo "<script type = \"text/javascript\">
-        window.location = (\"createStudents.php\")
+    if ($query) {
+        echo "<script type=\"text/javascript\">
+        window .location = (\"createStudents.php\")
         </script>";
     } else {
         $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>An error Occurred!</div>"; 
     }
 }
 
-
-
 if (isset($_GET['editId'])) {
-  $editId = $_GET['editId'];
-  $query = mysqli_query($conn, "SELECT * FROM tblstudents WHERE Id='$editId'");
-  $studentData = mysqli_fetch_array($query);
+    $editId = $_GET['editId'];
+    $query = mysqli_query($conn, "SELECT * FROM tblstudents WHERE Id='$editId'");
+    $studentData = mysqli_fetch_array($query);
 }
 
 ?>
@@ -111,30 +115,27 @@ if (isset($_GET['editId'])) {
   <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
   <link href="css/ruang-admin.min.css" rel="stylesheet">
 
-
   <script>
     function classArmDropdown(str) {
-    if (str == "") {
-        document.getElementById("txtHint").innerHTML = "";
-        return;
-    } else { 
-        if (window.XMLHttpRequest) {
-            // code for IE7+, Firefox, Chrome, Opera, Safari
-            xmlhttp = new XMLHttpRequest();
-        } else {
-            // code for IE6, IE5
-            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-        }
-        xmlhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("txtHint").innerHTML = this.responseText;
+        if (str == "") {
+            document.getElementById("txtHint").innerHTML = "";
+            return;
+        } else { 
+            if (window.XMLHttpRequest) {
+                xmlhttp = new XMLHttpRequest();
+            } else {
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
             }
-        };
-        xmlhttp.open("GET","ajaxClassArms2.php?cid="+str,true);
-        xmlhttp.send();
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("txtHint").innerHTML = this.responseText;
+                }
+            };
+            xmlhttp.open("GET","ajaxClassArms2.php?cid="+str,true);
+            xmlhttp.send();
+        }
     }
-}
-</script>
+  </script>
 </head>
 
 <body id="page-top">
@@ -174,31 +175,30 @@ if (isset($_GET['editId'])) {
                                                 <label class="form-control-label">School ID Number<span class="text-danger ml-2">*</span></label>
                                                 <input type="text" class="form-control" name="admissionNumber" value="<?php echo isset($studentData) ? $studentData['admissionNumber'] : ''; ?>" required>
                                             </div>
-                                          
                                         </div>
                                         <div class="form-group row mb-3">
-                                                <div class="col-xl-6">
-                                                    <label class="form-control-label">Select Company<span class="text-danger ml-2">*</span></label>
-                                                    <?php
-                                                    $qry = "SELECT * FROM tblcompany ORDER BY comp_name ASC";
-                                                    $result = $conn->query($qry);
-                                                    $num = $result->num_rows;		
-                                                    if ($num > 0) {
-                                                        echo '<select required name="comp_name" class="form-control mb-3">';
-                                                        echo '<option value="">--Select Company--</option>';
-                                                        while ($rows = $result->fetch_assoc()) {
-                                                            $selected = (isset($studentData) && $studentData['comp_name'] == $rows['comp_name']) ? 'selected' : '';
-                                                            echo '<option value="' . $rows['comp_name'] . '" ' . $selected . '>' . $rows['comp_name'] . '</option>';
-                                                        }
-                                                        echo '</select>';
+                                            <div class="col-xl-6">
+                                                <label class="form-control-label">Select Company<span class="text-danger ml-2">*</span></label>
+                                                <?php
+                                                $qry = "SELECT * FROM tblcompany ORDER BY comp_name ASC";
+                                                $result = $conn->query($qry);
+                                                $num = $result->num_rows;		
+                                                if ($num > 0) {
+                                                    echo '<select required name="comp_name" class="form-control mb-3">';
+                                                    echo '<option value="">--Select Company--</option>';
+                                                    while ($rows = $result->fetch_assoc()) {
+                                                        $selected = (isset($studentData) && $studentData['comp_name'] == $rows['comp_name']) ? 'selected' : '';
+                                                        echo '<option value ="' . $rows['comp_name'] . '" ' . $selected . '>' . $rows['comp_name'] . '</option>';
                                                     }
-                                                    ?>  
-                                                </div>
-                                                <div class="col-xl-6">                                           
-                                                    <label class="form-control-label">Company Link (Optional)<span class="text-danger ml-2"></span></label>
-                                                    <input type="text" class="form-control" name="comp_link" value="<?php echo isset($studentData) ? $studentData['comp_link'] : ''; ?>">
-                                                </div>
+                                                    echo '</select>';
+                                                }
+                                                ?>  
                                             </div>
+                                            <div class="col-xl-6">                                           
+                                                <label class="form-control-label">Company Link (Optional)<span class="text-danger ml-2"></span></label>
+                                                <input type="text" class="form-control" name="comp_link" value="<?php echo isset($studentData) ? $studentData['comp_link'] : ''; ?>">
+                                            </div>
+                                        </div>
 
                                         <div class="form-group row mb-3">
                                             <div class="col-xl-6">
@@ -230,10 +230,10 @@ if (isset($_GET['editId'])) {
                                                 ?>  
                                             </div>
                                             <div class="col-xl-6">
-                                            <label class="form-control-label">Hours need to Render <span class="text-danger ml-2">*</span></label>
+                                                <label class="form-control-label">Hours need to Render <span class="text-danger ml-2">*</span></label>
                                                 <input type="number" class="form-control" name="remaining_time" value="<?php echo isset($studentData) ? $studentData['remaining_time'] : ''; ?>" required>
                                             </div>
-                                            </div>
+                                        </div>
 
                                         <div class="form-group row mb-3">
                                             <div class="col-xl-6">
@@ -252,11 +252,9 @@ if (isset($_GET['editId'])) {
                                                 <input type="text" class="form-control" name="address" value="<?php echo isset($studentData) ? $studentData['address'] : ''; ?>" required>
                                             </div>
                                             <div class="col-xl-6">
-                                            <label class="form-control-label">Password <span class="text-danger ml-2">*</span></label>
+                                                <label class="form-control-label">Password <span class="text-danger ml-2">*</span></label>
                                                 <input type="password" class="form-control" name="password" value="<?php echo isset($studentData) ? $studentData['password'] : ''; ?>" required>
                                             </div>
-                                           
-                                               
                                         </div>
 
                                         <button type="submit" name="<?php echo isset($studentData) ? 'update' : 'save'; ?>" class="btn btn-primary"><?php echo isset($studentData) ? 'Update' : 'Save'; ?></button>
@@ -268,6 +266,7 @@ if (isset($_GET['editId'])) {
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="card mb-4">
+                        
                                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                             <h6 class="m-0 font-weight-bold text-primary">All Students</h6>
                                         </div>
