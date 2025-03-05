@@ -87,6 +87,7 @@ if (isset($_POST['update'])) {
   
     if ($query && $query1) {
         $statusMsg = "<div class='alert alert-success' style='margin-right:700px;'>Updated Successfully!</div>";
+        header("location: createStudents.php");
     } else {
         $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>An error Occurred!</div>";
     }
