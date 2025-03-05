@@ -3,6 +3,22 @@ error_reporting(0);
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
+
+// Initialize variables
+$statusMsg = "";
+$admissionNumber = "";
+$firstName = "";
+$lastName = "";
+$classId = "";
+$contact = "";
+$email = "";
+$address = "";
+$company = "";
+$remaining_time = "";
+$comp_link = "";
+$password = "";
+
+
 //------------------------SAVE--------------------------------------------------
 
 if(isset($_POST['save'])){
