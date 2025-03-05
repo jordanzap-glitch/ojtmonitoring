@@ -1,4 +1,5 @@
 <?php 
+ob_start();
 error_reporting(0);
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
@@ -376,3 +377,6 @@ if (isset($_GET['editId'])) {
 </body>
 
 </html>
+<?php
+ob_end_flush();
+?>
