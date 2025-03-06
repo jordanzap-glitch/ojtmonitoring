@@ -31,6 +31,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'approve' && isset($_GET['Id'])
     if ($entry) {
         // Calculate total hours submitted
         $totalHours = $entry['monday_time'] + $entry['tuesday_time'] + $entry['wednesday_time'] + $entry['thursday_time'] + $entry['friday_time'] + $entry['saturday_time'];
+        
+        // Include bonus time in total hours
+        $totalHours += $entry['bon_time'];
 
         // Update the remaining_time in tblstudents
         $admissionNumber = $entry['admissionNumber'];
@@ -48,11 +51,21 @@ if (isset($_GET['action']) && $_GET['action'] == 'approve' && isset($_GET['Id'])
     }
 }
 
+// Update bonus time
+if (isset($_POST['update_bonus'])) {
+    $entryId = mysqli_real_escape_string($conn, $_POST['entry_id']);
+    $bonusTime = mysqli_real_escape_string($conn, $_POST['bonus_time']);
+
+    $updateBonusQuery = "UPDATE tbl_weekly_time_entries SET bon_time = '$bonusTime' WHERE id = '$entryId'";
+    mysqli_query($conn, $updateBonusQuery);
+}
+
 // Fetch all submissions for admin to approve, with optional search and sorting
 $query = "
-    SELECT w.*, s.sessionName 
+    SELECT w.*, s.sessionName, st.render_time 
     FROM tbl_weekly_time_entries w 
     LEFT JOIN tblsessionterm s ON w.sessionId = s.id 
+    LEFT JOIN tblstudents st ON w.admissionNumber = st.admissionNumber
     WHERE w.status = 'pending'";
 
 if (!empty($searchTerm)) {
@@ -146,7 +159,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                             </div>
                         </div>
                     </form>
-                        <br>
+                    <br>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table" id="dataTableHover">
                             <thead>
@@ -166,7 +179,9 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                     <th>Friday</th>
                                     <th>Saturday</th>
                                     <th>Total Hours</th>
+                                    <th>Bonus Time</th>
                                     <th>Remaining Time</th>
+                                    <th>Render Time</th> <!-- New column for Render Time -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -191,11 +206,19 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <td>
                                                 <?php 
                                                 // Calculate total hours for display
-                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'];
+                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'];
                                                 echo $totalHours; 
                                                 ?>
                                             </td>
+                                            <td>
+                                                <form method="post" class="d-inline">
+                                                    <input type="hidden" name="entry_id" value="<?php echo $row['id']; ?>">
+                                                    <input type="number" name="bonus_time" value="<?php echo $row['bon_time']; ?>" class="form-control" style="width: 80px; display: inline;">
+                                                    <button type="submit" name="update_bonus" class="btn btn-warning btn-sm">Update</button>
+                                                </form>
+                                            </td>
                                             <td><?php echo $row['remaining_time']; ?></td>
+                                            <td><?php echo $row['render_time']; ?></td> <!-- Display Render Time -->
                                             <td>
                                                 <a href="?action=approve&Id=<?php echo $row['id']; ?>" class="btn btn-success">Approve</a>
                                             </td>
@@ -203,7 +226,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="16" class="text-center">No pending submissions.</td>
+                                        <td colspan="18" class="text-center">No pending submissions.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

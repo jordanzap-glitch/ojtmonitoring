@@ -51,7 +51,7 @@ if (isset($_POST['submit_time'])) {
     $comp_link = $_POST['comp_link'];
 
     // Check if today is Sunday
-    if (date('N') != 7) { // 7 means Sunday
+    if (date('N') != 4) { // 7 means Sunday
         $statusMsg = "<div class='alert alert-danger'>The form can only be submitted on Sundays.</div>";
     } else {
         // Validate that the week start date is a Monday
@@ -134,8 +134,8 @@ if (isset($_POST['submit_time'])) {
                 }
 
                 // Insert a new record with status 'pending'
-                $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo, status, sessionId) 
-                    VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', '$uploadFile', 'pending', '$activeSessionId')");
+                $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo, status, sessionId, total_hours) 
+                    VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', '$uploadFile', 'pending', '$activeSessionId', '$totalTimeSubmitted')");
 
                 if ($insertQuery) {
                     $_SESSION['submission_status'] = "success"; // Set session variable for success
@@ -248,7 +248,7 @@ if (isset($_POST['submit_time'])) {
                     </div>
                         <div class="col-xl-6">
                             <label class="form-control-label">Week Start Date (Select Monday)<span class="text-danger ml-2">*</span></label>
-                            <input type="date" class="form-control" name="week_start_date" readonly>
+                            <input type="date" class="form-control" name="week_start_date" >
                             <small class="form-text text-muted">Please select a Monday as the start date.</small>
                         </div>
                     </div>
@@ -353,7 +353,7 @@ if (isset($_POST['submit_time'])) {
                                       <td>" . $rows['thursday_time'] . "</td>
                                       <td>" . $rows['friday_time'] . "</td>
                                       <td>" . $rows['saturday_time'] . "</td>
-                                      <td>" . $totalHours . "</td>
+                                      <td>" . $rows['total_hours'] . "</td> <!-- Display Total Hours -->
                                       <td>" . $rows['remaining_time'] . "</td> <!-- Display Remaining Time -->
                                       <td>" . $rows['status'] . "</td> <!-- Display Status -->
                                       <td><a href='" . $rows['photo'] . "' target='_blank'><img src='" . $rows['photo'] . "' alt='Uploaded Photo' style='width: 50px; height: auto;'></a></td>
