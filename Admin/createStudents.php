@@ -138,6 +138,24 @@ if (isset($_POST['add_time'])) {
     }
 }
 
+// Handle updating remaining time directly
+if (isset($_POST['update_remaining_time'])) {
+    $remaining_time = $_POST['remaining_time'];
+    $admissionNumber = $_POST['admissionNumber'];
+
+    // Update the remaining_time directly
+    $query = mysqli_query($conn, "UPDATE tblstudents SET remaining_time='$remaining_time' WHERE admissionNumber='$admissionNumber'");
+
+    if ($query) {
+        $statusMsg = "<div class='alert alert-success' style='margin-right:700px;'>Remaining Time Updated Successfully!</div>";
+        // Redirect to refresh the page
+        header("Location: createStudents.php?editId=" . $studentData['Id']);
+        exit();
+    } else {
+        $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>An error Occurred while updating remaining time!</div>";
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -324,14 +342,19 @@ if (isset($_POST['add_time'])) {
                                         <div class="form-group row mb-3">
                                             <div class="col-xl-6">
                                                 <label class="form-control-label">Remaining Time <span class="text-danger ml-2">*</span></label>
-                                                <input type="number" class="form-control" name="remaining_time" value="<?php echo isset($studentData) ? $studentData['remaining_time'] : ''; ?>" required>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" name="remaining_time" value="<?php echo isset($studentData) ? $studentData['remaining_time'] : ''; ?>">
+                                                    <div class="input-group-append">
+                                                        <button type="submit" name="update_remaining_time" class="btn btn-secondary">Update</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="form-group row mb-3">
                                             <div class="col-xl-6">
                                                 <label class="form-control-label">Add Additional Time (Optional)<span class="text-danger ml-2"></span></label>
                                                 <div class="input-group">
-                                                    <input type="number" class="form-control" name="additional_time" placeholder="Enter additional time" required>
+                                                    <input type="number" class="form-control" name="additional_time" placeholder="Enter additional time">
                                                     <div class="input-group-append">
                                                         <button type="submit" name="add_time" class="btn btn-secondary">Add</button>
                                                     </div>
