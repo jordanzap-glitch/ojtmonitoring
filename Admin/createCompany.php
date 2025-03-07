@@ -1,5 +1,5 @@
 <?php 
-error_reporting(0);
+
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
