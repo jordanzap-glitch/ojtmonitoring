@@ -63,6 +63,7 @@
                 <h6 class="collapse-header">Student Time</h6>
                 <a class="collapse-item" href="approval.php">Approval</a>
                 <a class="collapse-item" href="viewtime.php">Time Table</a>
+                <!--<a class="collapse-item" href="dtrpictures.php">DTR Pictures</a> !-->
             </div>
         </div>
     </li>

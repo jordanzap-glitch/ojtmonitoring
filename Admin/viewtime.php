@@ -1,5 +1,4 @@
 <?php
-error_reporting(0);
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
@@ -18,6 +17,43 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['Id'])) {
     }
 }
 
+// Handle the update submission
+if (isset($_POST['update_time'])) {
+    $id = $_POST['id']; // Get the ID of the entry to update
+    $weekStartDate = $_POST['week_start_date'];
+    $mondayTime = floatval($_POST['monday_time']);
+    $tuesdayTime = floatval($_POST['tuesday_time']);
+    $wednesdayTime = floatval($_POST['wednesday_time']);
+    $thursdayTime = floatval($_POST['thursday_time']);
+    $fridayTime = floatval($_POST['friday_time']);
+    $saturdayTime = floatval($_POST['saturday_time']);
+    $totalHours = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime;
+    $imageLink = $_POST['image_link']; // New link input
+
+    // Update the record in the database
+    $updateQuery = "UPDATE tbl_weekly_time_entries SET 
+        week_start_date = '$weekStartDate',
+        monday_time = '$mondayTime',
+        tuesday_time = '$tuesdayTime',
+        wednesday_time = '$wednesdayTime',
+        thursday_time = '$thursdayTime',
+        friday_time = '$fridayTime',
+        saturday_time = '$saturdayTime',
+        total_hours = '$totalHours',
+        image_link = '$imageLink'
+        WHERE id = '$id'";
+
+    if (mysqli_query($conn, $updateQuery)) {
+        $statusMsg = "<div class='alert alert-success'>Record updated successfully!</div>";
+        // Optionally redirect to the same page to see the updated list
+        header("Location: your_page.php"); // Change 'your_page.php' to the actual page
+        exit();
+    } else {
+        $statusMsg = "<div class='alert alert-danger'>Error updating record: " . mysqli_error($conn) . "</div>";
+    }
+}
+
+// Handle delete action
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['Id'])) {
     $deleteId = $_GET['Id'];
     $deleteQuery = "DELETE FROM tbl_weekly_time_entries WHERE id = '$deleteId'";
@@ -25,93 +61,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['Id']))
         $statusMsg = "<div class='alert alert-success'>Record deleted successfully!</div>";
     } else {
         $statusMsg = "<div class='alert alert-danger'>Error deleting record!</div>";
-    }
-}
-
-if (isset($_POST['submit_time'])) {
-    // Get the input values
-    $admissionNumber = $_POST['admissionNumber']; // Get the admission number
-    $studentFullname = $_POST['student_fullname'];
-    $course = $_POST['course'];
-    $weekStartDate = $_POST['week_start_date'];
-    $comp_name = $_POST['comp_name'];
-    $comp_link = $_POST['comp_link'];
-    $sessionId = $_POST['sessionId']; // Get the session ID
-
-    // Validate that the week start date is a Monday
-    $date = new DateTime($weekStartDate);
-    if ($date->format('N') != 1) { // 1 means Monday
-        $statusMsg = "<div class='alert alert-danger'>The selected date must be a Monday.</div>";
-    } else {
-        // Proceed with the rest of the code
-        $mondayTime = floatval($_POST['monday_time']);
-        $tuesdayTime = floatval($_POST['tuesday_time']);
-        $wednesdayTime = floatval($_POST['wednesday_time']);
-        $thursdayTime = floatval($_POST['thursday_time']);
-        $fridayTime = floatval($_POST['friday_time']);
-        $saturdayTime = floatval($_POST['saturday_time']); // New Saturday time
-
-        // Calculate total time submitted
-        $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime;
-
-        // Handle file upload
-        $uploadDir = '../uploads/'; // Directory to save uploaded files
-        $uploadFile = $uploadDir . basename($_FILES['photo']['name']);
-        $imageFileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
-        $uploadOk = 1;
-
-        // Check if image file is a actual image or fake image
-        if (isset($_FILES['photo']) && $_FILES['photo']['error'] != UPLOAD_ERR_NO_FILE) {
-            $check = getimagesize($_FILES['photo']['tmp_name']);
-            if ($check === false) {
-                $statusMsg = "<div class='alert alert-danger'>File is not an image.</div>";
-                $uploadOk = 0;
-            }
-
-            // Check file size (limit to 2MB)
-            if ($_FILES['photo']['size'] > 2000000) {
-                $statusMsg = "<div class='alert alert-danger'>Sorry, your file is too large. Maximum size is 2MB.</div>";
-                $uploadOk = 0;
-            }
-
-            // Allow certain file formats
-            if ($imageFileType != "jpg" && $imageFileType != "png") {
-                $statusMsg = "<div class='alert alert-danger'>Sorry, only JPG and PNG files are allowed.</div>";
-                $uploadOk = 0;
-            }
-
-            // Check if $uploadOk is set to 0 by an error
-            if ($uploadOk == 0) {
-                $statusMsg .= "<div class='alert alert-danger'>Your file was not uploaded.</div>";
-            } else {
-                // If everything is ok, try to upload file
-                if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadFile)) {
-                    $statusMsg = "<div class='alert alert-success'>The file ". htmlspecialchars(basename($_FILES['photo']['name'])). " has been uploaded.</div>";
-                } else {
-                    $statusMsg = "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
-                }
-            }
-        }
-
-        // Prepare the update query
-        $updateQuery = "UPDATE tbl_weekly_time_entries SET week_start_date = '$weekStartDate', monday_time = '$mondayTime', tuesday_time = '$tuesdayTime', wednesday_time = '$wednesdayTime', thursday_time = '$thursdayTime', friday_time = '$fridayTime', saturday_time = '$saturdayTime', sessionId = '$sessionId'";
-
-        // If a new photo was uploaded, include it in the update query
-        if (isset($_FILES['photo']) && $_FILES['photo']['error'] != UPLOAD_ERR_NO_FILE) {
-            $updateQuery .= ", photo = '$uploadFile'";
-        }
-
-        // Complete the update query with the WHERE clause
-        $updateQuery .= " WHERE id = '$editId'";
-
-        // Execute the update query
-        if (mysqli_query($conn, $updateQuery)) {
-            $statusMsg = "<div class='alert alert-success'>Weekly time updated successfully!</div>";
-            header("Location: viewtime.php");
-            exit; // Ensure no further code is executed after redirection
-        } else {
-            $statusMsg = "<div class='alert alert-danger'>Error updating weekly time!</div>";
-        }
     }
 }
 ?>
@@ -130,25 +79,6 @@ if (isset($_POST['submit_time'])) {
   <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
   <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
   <link href="css/ruang-admin.min.css" rel="stylesheet">
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const weekStartDateInput = document.querySelector('input[name="week_start_date"]');
-        
-        // Function to set the date to the previous Monday
-        function setPreviousMonday() {
-            const today = new Date();
-            const previousMonday = new Date(today);
-            const dayOfWeek = today.getDay();
-            const daysSinceMonday = (dayOfWeek + 6) % 7; // Calculate days since last Monday
-            previousMonday.setDate(today.getDate() - daysSinceMonday);
-            weekStartDateInput.value = previousMonday.toISOString().split('T')[0]; // Set the input value to previous Monday
-        }
-
-        // Set the previous Monday on page load
-        setPreviousMonday();
-    });
-</script>
 </head>
 
 <body id="page-top">
@@ -165,177 +95,141 @@ if (isset($_POST['submit_time'])) {
         <!-- Container Fluid-->
         <div class="container-fluid" id="container-wrapper">
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Weekly Time Submission</h1>
+            <h1 class="h3 mb-0 text-gray-800">Weekly Time Entries</h1>
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="./">Home</a></li>
-              <li class="breadcrumb-item active" aria-current="page">Weekly Time Submission</li>
+              <li class="breadcrumb-item active" aria-current="page">Weekly Time Entries</li>
             </ol>
           </div>
 
           <div class="row">
             <div class="col-lg-12">
-              <!-- Form Basic -->
+              <!-- Display Submitted Weekly Time -->
               <div class="card mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary"><?php echo $editMode ? 'Edit Weekly Time' : 'Submit Weekly Time'; ?></h6>
+                  <h6 class="m-0 font-weight-bold text-primary">Submitted Weekly Time</h6>
                   <?php echo isset($statusMsg) ? $statusMsg : ''; ?>
                 </div>
-                <div class="card-body">
-                <form method="post" enctype="multipart/form-data">
-                <div class="form-group row mb-3">
-                <div class="col-xl-6">
-                            <label class="form-control-label">Student ID (Double Check Your Student ID)<span class="text-danger ml-2">*</span></label>
-                            <input type="text" class="form-control" name="admissionNumber" value="<?php echo $editMode ? htmlspecialchars($editData['admissionNumber']) : ''; ?>" required readonly>
-                        </div>
-                    </div>
-                <div class="form-group row mb-3">
-              
-                    <div class="col-xl-6">
-                        <label class="form-control-label">Student Full Name<span class="text-danger ml-2">*</span></label>
-                        <input type="text" class="form-control" name="student_fullname" value="<?php echo $editMode ? htmlspecialchars($editData['student_fullname']) : ''; ?>" required readonly>
-                    </div>
-                    <div class="col-xl-6">
-                        <label class="form-control-label">Company<span class="text-danger ml-2">*</span></label>
-                        <input type="text" class="form-control" name="comp_name" value="<?php echo $editMode ? htmlspecialchars($editData['comp_name']) : ''; ?>" required readonly>
-                    </div>
-                </div>
-                <div class="form-group row mb-3">
-                    <div class="col-xl-6">
-                      <label class="form-control-label">Section<span class="text-danger ml-2">*</span></label>
-                      <input type="text" class="form-control" name="course" value="<?php echo $editMode ? htmlspecialchars($editData['course']) : ''; ?>" required readonly>
-                  </div>
-                    <div class="col-xl-6">
-                    <label class="form-control-label">Company Link (Website link or Facebook Link)<span class="text-danger ml-2">*</span></label>
-                            <input type="text" class="form-control" name="comp_link" id="comp_link" value="<?php echo $editMode ? $editData['comp_link'] : ''; ?>" required>
-                        </div>
-                    </div>
-                    <div class="form-group row mb-3">
-                        <div class="col-xl-6">
-                            <label class="form-control-label">Week Start Date (Select Monday)<span class="text-danger ml-2">*</span></label>
-                            <input type="date" class="form-control" name="week_start_date" value="<?php echo $editMode ? $editData['week_start_date'] : ''; ?>" required>
-                            <small class="form-text text-muted">Please select a Monday as the start date.</small>
-                        </div>
-                        <div class="col-xl-6">
-                            <label class="form-control-label">Monday Time (in hours)<span class="text-danger ml-2">*</span></label>
-                            <input type="number" class="form-control" name="monday_time" min="0" max="8" step="0.1" value="<?php echo $editMode ? $editData['monday_time'] : ''; ?>" required>
-                        </div>
-                    </div>
-                    <div class="form-group row mb-3">
-                        <div class="col-xl-6">
-                            <label class="form-control-label">Tuesday Time (in hours)<span class="text-danger ml-2">*</span></label>
-                            <input type="number" class="form-control" name="tuesday_time" min="0" max="8" step="0.1" value="<?php echo $editMode ? $editData['tuesday_time'] : ''; ?>" required>
-                        </div>
-                        <div class="col-xl-6">
-                            <label class="form-control-label">Wednesday Time (in hours)<span class="text-danger ml-2">*</span></label>
-                            <input type="number" class="form-control" name="wednesday_time" min="0" max="8" step="0.1" value="<?php echo $editMode ? $editData['wednesday_time'] : ''; ?>" required>
-                        </div>
-                    </div>
-                    <div class="form-group row mb-3">
-                        <div class="col-xl-6">
-                            <label class="form-control-label">Thursday Time (in hours)<span class="text-danger ml-2">*</span></label>
-                            <input type="number" class="form-control" name="thursday_time" min="0" max="8" step="0.1" value="<?php echo $editMode ? $editData['thursday_time'] : ''; ?>" required>
-                        </div>
-                        <div class="col-xl-6">
-                            <label class="form-control-label">Friday Time (in hours)<span class="text-danger ml-2">*</span></label>
-                            <input type="number" class="form-control" name="friday_time" min="0" max="8" step="0.1" value="<?php echo $editMode ? $editData['friday_time'] : ''; ?>" required>
-                        </div>
-                    </div>
-                    <div class="form-group row mb-3">
-                        <div class="col-xl-6">
-                            <label class="form-control-label">Saturday Time (in hours)<span class="text-danger ml-2">*</span></label>
-                            <input type="number" class="form-control" name="saturday_time" min="0" max="8" step="0.1" value="<?php echo $editMode ? $editData['saturday_time'] : ''; ?>" required>
-                        </div>
-                        <div class="col-xl-6">
-                            <label class="form-control-label">Upload Photo (DTR) (JPEG or PNG)<span class="text-danger ml-2">*</span></label>
-                            <input type="file" class="form-control" name="photo" accept=".jpg, .jpeg, .png">
-                            <small class="form-text text-muted">Maximum file size: 2MB. Leave blank if not changing.</small>
-                        </div>
-                    </div>
-                    <button type="submit" name="submit_time" class="btn btn-primary"><?php echo $editMode ? 'Update Time' : 'Update Time '; ?></button>
-                </form>
-                </div>
-              </div>
-
-              <!-- Display Submitted Weekly Time -->
-              <div class="row">
-                <div class="col-lg-12">
-                  <div class="card mb-4">
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                      <h6 class="m-0 font-weight-bold text-primary">Submitted Weekly Time</h6>
-                    </div>
-                    <div class="table-responsive p-3">
-                      <table class="table align-items-center table-flush table-hover" id="dataTableHover">
-                        <thead class="thead-light">
-                          <tr>
-                            <th>#</th>
-                            <th>Week Start Date</th>
-                            <th>Student Full Name</th>
-                            <th>Course</th>
-                            <th>Company</th>
-                            <th>Company Link</th>
-                            <th>Monday</th>
-                            <th>Tuesday</th>
-                            <th>Wednesday</th>
-                            <th>Thursday</th>
-                            <th>Friday</th>
-                            <th>Saturday</th>
-                            <th>Total Hours</th>
-                            <th>Remaining Time</th>
-                            <th>Session</th>
-                            <th>Status</th>
-                            <th>Photo</th>
-                            <th>Edit</th>
-                            <th>Delete</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $query = "SELECT w.*, s.sessionName FROM tbl_weekly_time_entries w JOIN tblsessionterm s ON w.sessionId = s.id";
-                            $rs = $conn->query($query);
-                            $num = $rs->num_rows;
-                            $sn = 0;
-                            if ($num > 0) {
-                                while ($rows = $rs->fetch_assoc()) {
-                                    $sn++;
-                                    $totalHours = $rows['monday_time'] + $rows['tuesday_time'] + $rows['wednesday_time'] + $rows['thursday_time'] + $rows['friday_time'] + $rows['saturday_time']; // Include Saturday time
-                                    $remainingTime = $rows['remaining_time'];
-                                    $status = $rows['status'];
-                                    echo "
-                                    <tr>
-                                        <td>".$sn."</td>
-                                        <td>".$rows['week_start_date']."</td>
-                                        <td>".$rows['student_fullname']."</td>
-                                        <td>".$rows['course']."</td>
-                                        <td>".$rows['comp_name']."</td>
-                                        <td>".$rows['comp_link']."</td>
-                                        <td>".$rows['monday_time']."</td>
-                                        <td>".$rows['tuesday_time']."</td>
-                                        <td>".$rows['wednesday_time']."</td>
-                                        <td>".$rows['thursday_time']."</td>
-                                        <td>".$rows['friday_time']."</td>
-                                        <td>".$rows['saturday_time']."</td> <!-- Display Saturday time -->
-                                        <td>".$totalHours."</td>
-                                        <td>".$remainingTime."</td>
-                                        <td>".$rows['sessionName']."</td> <!-- Display sessionName -->
-                                        <td>".$status."</td>
-                                        <td><a href='".$rows['photo']."' target='_blank'><img src='".$rows['photo']."' alt='Uploaded Photo' style='width: 50px; height: auto;'></a></td>
-                                        <td><a href='?action=edit&Id=".$rows['id']."'><i class='fas fa-fw fa-edit'></i>Edit</a></td>
-                                       <td><a href='?action=delete&Id=".$rows['id']."'><i class='fas fa-fw fa-trash'></i>Delete</a></td>
-                                    </tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='15' class='text-center'>No Record Found!</td></tr>";
+                <div class="table-responsive p-3">
+                  <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                    <thead class="thead-light">
+                      <tr>
+                        <th>#</th>
+                        <th>Week Start Date</th>
+                        <th>Admission Number</th>
+                        <th>Student Full Name</th>
+                        <th>Course</th>
+                        <th>Session ID</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                        <th>Total Hours</th>
+                        <th>Remaining Time</th>
+                        <th>Date Created</th>
+                        <th>Status</th>
+                        <th>Image Link</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $query = "SELECT * FROM tbl_weekly_time_entries";
+                        $rs = $conn->query($query);
+                        $num = $rs->num_rows;
+                        $sn = 0;
+                        if ($num > 0) {
+                            while ($rows = $rs->fetch_assoc()) {
+                                $sn++;
+                                echo "
+                                <tr>
+                                    <td>".$sn."</td>
+                                    <td>".$rows['week_start_date']."</td>
+                                    <td>".$rows['admissionNumber']."</td>
+                                    <td>".$rows['student_fullname']."</td>
+                                    <td>".$rows['course']."</td>
+                                    <td>".$rows['sessionId']."</td>
+                                    <td>".$rows['monday_time']."</td>
+                                    <td>".$rows['tuesday_time']."</td>
+                                    <td>".$rows['wednesday_time']."</td>
+                                    <td>".$rows['thursday_time']."</td>
+                                    <td>".$rows['friday_time']."</td>
+                                    <td>".$rows['saturday_time']."</td>
+                                    <td>".$rows['total_hours']."</td>
+                                    <td>".$rows['remaining_time']."</td>
+                                    <td>".$rows['date_created']."</td>
+                                    <td>".$rows['status']."</td>
+                                    <td><a href='".$rows['image_link']."' target='_blank'>View Image</a></td>
+                                    <td><a href='?action=edit&Id=".$rows['id']."'><i class='fas fa-fw fa-edit'></i>Edit</a></td>
+                                    <td><a href='?action=delete&Id=".$rows['id']."'><i class='fas fa-fw fa-trash'></i>Delete</a></td>
+                                </tr>";
                             }
-                            ?>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                        } else {
+                            echo "<tr><td colspan='15' class='text-center'>No Record Found!</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
           </div>
           <!--Row-->
+
+          <!-- Edit Form -->
+          <?php if ($editMode): ?>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="card mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Edit Weekly Time Entry</h6>
+                </div>
+                <div class="card-body">
+                  <form method="post" action="">
+                    <input type="hidden" name="id" value="<?php echo $editData['id']; ?>">
+                    <div class="form-group">
+                      <label for="week_start_date">Week Start Date</label>
+                      <input type="date" class="form-control" name="week_start_date" value="<?php echo $editData['week_start_date']; ?>" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="monday_time">Monday Time (in hours)</label>
+                      <input type="number" class="form-control" name="monday_time" value="<?php echo $editData['monday_time']; ?>" min="0" max="8" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="tuesday_time">Tuesday Time (in hours)</label>
+                      <input type="number" class="form-control" name="tuesday_time" value="<?php echo $editData['tuesday_time']; ?>" min="0" max="8" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="wednesday_time">Wednesday Time (in hours)</label>
+                      <input type="number" class="form-control" name="wednesday_time" value="<?php echo $editData['wednesday_time']; ?>" min="0" max="8" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="thursday_time">Thursday Time (in hours)</label>
+                      <input type="number" class="form-control" name="thursday_time" value="<?php echo $editData['thursday_time']; ?>" min="0" max="8" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="friday_time">Friday Time (in hours)</label>
+                      <input type="number" class="form-control" name="friday_time" value="<?php echo $editData['friday_time']; ?>" min="0" max="8" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="saturday_time">Saturday Time (in hours)</label>
+                      <input type="number" class="form-control" name="saturday_time" value="<?php echo $editData['saturday_time']; ?>" min="0" max="8" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="image_link">Image Link</label>
+                      <input type="text" class="form-control" name="image_link" value="<?php echo $editData['image_link']; ?>" required>
+                    </div>
+                    <button type="submit" name="update_time" class="btn btn-primary">Update Entry</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <?php endif; ?>
+          <!-- End Edit Form -->
 
         </div>
         <!---Container Fluid-->

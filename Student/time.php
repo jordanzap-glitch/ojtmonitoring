@@ -49,6 +49,7 @@ if (isset($_POST['submit_time'])) {
     $weekStartDate = $_POST['week_start_date'];
     $comp_name = $_POST['comp_name'];
     $comp_link = $_POST['comp_link'];
+    $image_link = $_POST['image_link']; // New link input
 
     // Validate that the week start date is a Monday
     $date = new DateTime($weekStartDate);
@@ -73,43 +74,6 @@ if (isset($_POST['submit_time'])) {
             // Calculate total time submitted
             $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime;
 
-            // Handle file upload
-            $uploadDir = '../dtruploads/'; // Directory to save uploaded files
-            $uploadFile = $uploadDir . basename($_FILES['photo']['name']);
-            $imageFileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
-            $uploadOk = 1;
-
-            // Check if image file is a actual image or fake image
-            $check = getimagesize($_FILES['photo']['tmp_name']);
-            if ($check === false) {
-                $statusMsg = "<div class='alert alert-danger'>File is not an image.</div>";
-                $uploadOk = 0;
-            }
-
-            // Check file size (limit to 5MB)
-            if ($_FILES['photo']['size'] > 5000000) { // 5MB
-                $statusMsg = "<div class='alert alert-danger'>Sorry, your file is too large. Maximum size is 5MB.</div>";
-                $uploadOk = 0;
-            }
-
-            // Allow certain file formats
-            if ($imageFileType != "jpg" && $imageFileType != "png") {
-                $statusMsg = "<div class='alert alert-danger'>Sorry, only JPG and PNG files are allowed.</div>";
-                $uploadOk = 0;
-            }
-
-            // Check if $uploadOk is set to 0 by an error
-            if ($uploadOk == 0) {
-                $statusMsg .= "<div class='alert alert-danger'>Your file was not uploaded.</div>";
-            } else {
-                // If everything is ok, try to upload file
-                if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadFile)) {
-                    $statusMsg = "<div class='alert alert-success'>The file ". htmlspecialchars(basename($_FILES['photo']['name'])). " has been uploaded.</div>";
-                } else {
-                    $statusMsg = "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
-                }
-            }
-
             // Fetch the remaining time from the students table
             $remainingTimeQuery = "SELECT remaining_time FROM tblstudents WHERE admissionNumber = '$admissionNumber'";
             $remainingTimeResult = mysqli_query($conn, $remainingTimeQuery);
@@ -130,8 +94,8 @@ if (isset($_POST['submit_time'])) {
             }
 
             // Insert a new record with status 'pending'
-            $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, photo, status, sessionId, total_hours) 
-                VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', '$uploadFile', 'pending', '$activeSessionId', '$totalTimeSubmitted')");
+            $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, status, sessionId, total_hours, image_link) 
+                VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', 'pending', '$activeSessionId', '$totalTimeSubmitted', '$image_link')");
 
             if ($insertQuery) {
                 $_SESSION['submission_status'] = "success"; // Set session variable for success
@@ -248,7 +212,7 @@ if (isset($_POST['submit_time'])) {
                         </div>
                     </div>
                     <div class="form-group row mb-3">
-                        <div class="col-xl-6">
+                        <div class=" col-xl-6">
                             <label class="form-control-label">Monday Time (in hours)<span class="text-danger ml-2">*</span></label>
                             <input type="number" class="form-control" name="monday_time" min="0" max="8" step="0.1" required>
                         </div>
@@ -273,15 +237,14 @@ if (isset($_POST['submit_time'])) {
                             <input type="number" class="form-control" name="friday_time" min="0" max="8" step="0.1" required>
                         </div>
                         <div class="col-xl-6">
-                            <label class="form-control-label">Saturday Time (in hours)<span class="text-danger ml-2">*</span></label>
-                            <input type="number" class="form-control" name="saturday_time" min="0" max="8" step="0.1" placeholder="Put Zero(0) if only Monday to Friday" required>
+                            <label class="form-control-label">Saturday Time (in hours)<span class="text-danger ml-2"></span></label>
+                            <input type="number" class="form-control" name="saturday_time" min="0" max="8" step=" 0.1" placeholder="Put Zero(0) if only Monday to Friday">
                         </div>
                     </div>
                     <div class="form-group row mb-3">
-                        <div class="col-xl-12">
-                            <label class="form-control-label">Upload Photo (DTR) (JPEG or PNG)<span class="text-danger ml-2">*</span></label>
-                            <input type="file" class="form-control" name="photo" accept=".jpg, .jpeg, .png" required>
-                            <small class="form-text text-muted">Maximum file size: 5MB.</small>
+                        <div class="col-xl-6">
+                            <label class="form-control-label">Link for DTR (Gdrive Link png, or pdf)<span class="text-danger ml-2">*</span></label>
+                            <input type="text" class="form-control" name="image_link" placeholder="Google Drive link" required>
                         </div>
                     </div>
                     <button type="submit" name="submit_time" class="btn btn-primary">Submit Time</button>
@@ -310,6 +273,7 @@ if (isset($_POST['submit_time'])) {
                             <th>Course</th>
                             <th>Company</th>
                             <th>Company Link</th>
+                            <th>Link</th> <!-- New column for Link -->
                             <th>Monday</th>
                             <th>Tuesday</th>
                             <th>Wednesday</th>
@@ -319,7 +283,6 @@ if (isset($_POST['submit_time'])) {
                             <th>Total Hours</th>
                             <th>Remaining Time</th> <!-- New column for Remaining Time -->
                             <th>Status</th> <!-- New column for Status -->
-                            <th>Photo</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -342,6 +305,7 @@ if (isset($_POST['submit_time'])) {
                                       <td>" . $rows['course'] . "</td>
                                       <td>" . $rows['comp_name'] . "</td>
                                       <td>" . $rows['comp_link'] . "</td>
+                                      <td><a href='" . $rows['image_link'] . "' target='_blank'>" . $rows['image_link'] . "</a></td> <!-- Display Link -->
                                       <td>" . $rows['monday_time'] . "</td>
                                       <td>" . $rows['tuesday_time'] . "</td>
                                       <td>" . $rows['wednesday_time'] . "</td>
@@ -351,7 +315,6 @@ if (isset($_POST['submit_time'])) {
                                       <td>" . $rows['total_hours'] . "</td> <!-- Display Total Hours -->
                                       <td>" . $rows['remaining_time'] . "</td> <!-- Display Remaining Time -->
                                       <td>" . $rows['status'] . "</td> <!-- Display Status -->
-                                      <td><a href='" . $rows['photo'] . "' target='_blank'><img src='" . $rows['photo'] . "' alt='Uploaded Photo' style='width: 50px; height: auto;'></a></td>
                                   </tr>";
                               }
                           } else {
@@ -369,7 +332,7 @@ if (isset($_POST['submit_time'])) {
           <!--Row-->
 
         </div>
-        <!---Container Fluid-->
+        <!-- Container Fluid-->
       </div>
       <!-- Footer -->
        <?php include "Includes/footer.php";?>
