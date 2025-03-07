@@ -41,13 +41,18 @@ if(isset($_POST['save'])){
     $usertype = $_POST['user_type'];
     $usernew = "Student";
      
+    // Check if admission number exists
     $query = mysqli_query($conn, "SELECT * FROM tblstudents WHERE admissionNumber ='$admissionNumber'");
+    // Check if email exists in tbluser
     $query1 = mysqli_query($conn, "SELECT * FROM tbluser WHERE emailAddress ='$email'");
   
     $ret = mysqli_fetch_array($query);
+    $ret1 = mysqli_fetch_array($query1);
   
     if ($ret > 0) { 
         $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>This Admission Number Already Exists!</div>";
+    } elseif ($ret1 > 0) {
+        $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>This Email Address Already Exists!</div>";
     } else {
         // Insert into tblstudents with remaining_time set to render_time
         $query = mysqli_query($conn, "INSERT INTO tblstudents(admissionNumber, firstName, lastName, classId, contact, email, address, comp_name, password, dateCreated, render_time, remaining_time, comp_link) 
@@ -79,8 +84,8 @@ if (isset($_POST['update'])) {
     $comp_link = $_POST['comp_link'];
     $password = $_POST['password'];
   
-    // Update the student details
-    $query = mysqli_query($conn, "UPDATE tblstudents SET admissionNumber='$admissionNumber', firstName='$firstName', lastName='$lastName', classId='$classId', contact='$contact', email='$email', address='$address', comp_name='$company', password='$password', render_time='$render_time', remaining_time='$render_time', comp_link='$comp_link' WHERE Id='$Id'");
+    // Update the student details without changing remaining_time
+    $query = mysqli_query($conn, "UPDATE tblstudents SET admissionNumber='$admissionNumber', firstName='$firstName', lastName='$lastName', classId='$classId', contact='$contact', email='$email', address='$address', comp_name='$company', password='$password', render_time='$render_time', comp_link='$comp_link' WHERE Id='$Id'");
   
     // Update the user details
     $query1 = mysqli_query($conn, "UPDATE tbluser SET emailAddress='$email', password='$password' WHERE emailAddress='$email'");
@@ -125,6 +130,9 @@ if (isset($_POST['add_time'])) {
 
     if ($query) {
         $statusMsg = "<div class='alert alert-success' style='margin-right:700px;'>Time Added Successfully!</div>";
+        // Redirect to refresh the page
+        header("Location: createStudents.php?editId=" . $studentData['Id']);
+        exit();
     } else {
         $statusMsg = "<div class='alert alert-danger' style='margin-right:700px;'>An error Occurred while adding time!</div>";
     }
@@ -207,7 +215,6 @@ if (isset($_POST['add_time'])) {
                             <div class="card mb-4">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary"><?php echo isset($studentData) ? 'Edit Student' : 'Create Students'; ?></h6>
-                                    
                                 </div>
                                 <div class="card-body">
                                     <form method="post">
@@ -278,29 +285,6 @@ if (isset($_POST['add_time'])) {
                                             </div>
                                         </div>
 
-                                        <?php if (isset($studentData)): ?>
-                                            <div class="form-group row mb-3">
-                                                <div class="col-xl-6">
-                                                    <button type="button" class="btn btn-secondary" onclick="toggleAddTime()">Add Time</button>
-                                                </div>
-                                            </div>
-
-                                            <div id="addTimeDiv" style="display: none;">
-                                                <div class="form-group row mb-3">
-                                                    <div class="col-xl-6">
-                                                        <label class="form-control-label">Add Time (Optional)<span class="text-danger ml-2"></span></label>
-                                                        <div class="input-group">
-                                                            <input type="number" class="form-control" name="additional_time" placeholder="Enter additional time" required>
-                                                            <input type="hidden" name="admissionNumber" value="<?php echo isset($studentData) ? $studentData['admissionNumber'] : ''; ?>">
-                                                            <div class="input-group-append">
-                                                                <button type="submit" name="add_time" class="btn btn-secondary">Add</button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?>
-
                                         <div class="form-group row mb-3">
                                             <div class="col-xl-6">
                                                 <label class="form-control-label">Contact Number<span class="text-danger ml-2">*</span></label>
@@ -328,11 +312,41 @@ if (isset($_POST['add_time'])) {
                                 </div>
                             </div>
 
+                            <!-- Remaining Time Section -->
+                            <?php if (isset($studentData)): ?>
+                            <div class="card mb-4">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Manage Remaining Time</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post">
+                                        <input type="hidden" name="admissionNumber" value="<?php echo isset($studentData) ? $studentData['admissionNumber'] : ''; ?>">
+                                        <div class="form-group row mb-3">
+                                            <div class="col-xl-6">
+                                                <label class="form-control-label">Remaining Time <span class="text-danger ml-2">*</span></label>
+                                                <input type="number" class="form-control" name="remaining_time" value="<?php echo isset($studentData) ? $studentData['remaining_time'] : ''; ?>" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row mb-3">
+                                            <div class="col-xl-6">
+                                                <label class="form-control-label">Add Additional Time (Optional)<span class="text-danger ml-2"></span></label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" name="additional_time" placeholder="Enter additional time" required>
+                                                    <div class="input-group-append">
+                                                        <button type="submit" name="add_time" class="btn btn-secondary">Add</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
                             <!-- Input Group -->
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="card mb-4">
-                        
                                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                             <h6 class="m-0 font-weight-bold text-primary">All Students</h6>
                                         </div>
