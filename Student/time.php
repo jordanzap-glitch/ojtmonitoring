@@ -207,7 +207,7 @@ if (isset($_POST['submit_time'])) {
                     </div>
                         <div class="col-xl-6">
                             <label class="form-control-label">Week Start Date (Select Monday)<span class="text-danger ml-2">*</span></label>
-                            <input type="date" class="form-control" name="week_start_date">
+                            <input type="date" class="form-control" name="week_start_date" readonly>
                             <small class="form-text text-muted">Please select a Monday as the start date.</small>
                         </div>
                     </div>
