@@ -46,7 +46,7 @@ if (isset($_POST['update_time'])) {
     if (mysqli_query($conn, $updateQuery)) {
         $statusMsg = "<div class='alert alert-success'>Record updated successfully!</div>";
         // Optionally redirect to the same page to see the updated list
-        header("Location: your_page.php"); // Change 'your_page.php' to the actual page
+        header("Location: viewtime.php"); // Change 'your_page.php' to the actual page
         exit();
     } else {
         $statusMsg = "<div class='alert alert-danger'>Error updating record: " . mysqli_error($conn) . "</div>";
