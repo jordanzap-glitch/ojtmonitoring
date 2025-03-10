@@ -1,4 +1,5 @@
 <?php
+ob_start();
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
@@ -261,3 +262,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['Id']))
   </script>
 </body>
 </html>
+<?php
+
+ob_end_flush();
+
+?>
