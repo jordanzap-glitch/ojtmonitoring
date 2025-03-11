@@ -35,6 +35,9 @@
                     } else {
                         document.write('<p class="collapse-item disabled">Submit Time (Already Submitted)</p>');
                     }
+
+                    // Always show the "View Submitted Time" link
+                    document.write('<a class="collapse-item" href="reports.php">Compose Message</a>');
                 </script>
             </div>
         </div>

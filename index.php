@@ -60,12 +60,13 @@ if (isset($_POST['login'])) {
             if ($num_student > 0) {
                 // Student detected
                 $_SESSION['userId'] = $rows_student['Id'];
+                $_SESSION['admissionNumber'] = $rows_student['admissionNumber'];
                 $_SESSION['firstName'] = $rows_student['firstName'];
                 $_SESSION['lastName'] = $rows_student['lastName'];
                 $_SESSION['email'] = $rows_student['email'];
                 $_SESSION['classId'] = $rows_student['classId'];
                 $_SESSION['user_type'] = 'Student';
-                $_SESSION['admissionNumber'] = $userAdmissionNumber; // Set session user type
+                // Set session user type
 
                 // Redirect to student dashboard
                 header('Location:Student/index.php');

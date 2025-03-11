@@ -1,6 +1,15 @@
 <?php 
-include '../Includes/session.php';
-include '../Includes/dbcon.php';
+include '../Includes/session.php'; // Include session management
+include '../Includes/dbcon.php'; // Include database connection
+
+$error_message = '';
+$success_message = '';
+
+// Check if the user is logged in
+if (!isset($_SESSION['userId'])) {
+    header("Location: login.php"); // Redirect to login if not logged in
+    exit();
+}
 
 // Fetch the count of pending DTR submissions
 $queryPendingDTR = "SELECT COUNT(*) as pendingCount FROM tbl_weekly_time_entries WHERE status = 'pending'";
@@ -18,6 +27,12 @@ WHERE tblclassteacher.Id = '$_SESSION[userId]'";
 $rs = $conn->query($query);
 $num = $rs->num_rows;
 $rrw = $rs->fetch_assoc();
+
+// Fetch total reports count
+$queryReports = "SELECT COUNT(*) as totalReports FROM tblreports";
+$resultReports = $conn->query($queryReports);
+$rowReports = $resultReports->fetch_assoc();
+$totalReportsCount = $rowReports['totalReports'];
 ?>
 
 <!DOCTYPE html>
@@ -78,10 +93,6 @@ $rrw = $rs->fetch_assoc();
               </div>
             </div>
 
-       
-            <!-- Total Coordinators Card -->
-        
-
             <!-- Total Companies Card -->
             <?php 
             $query1 = mysqli_query($conn, "SELECT * from tblcompany");                       
@@ -96,7 +107,7 @@ $rrw = $rs->fetch_assoc();
                       <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $totAttendance; ?></div>
                     </div>
                     <div class="col-auto">
-                      <i class="fas fa-calendar fa-2x text-secondary"></i>
+                      <i class="fas fa-building fa-2x text-secondary"></i>
                     </div>
                   </div>
                 </div>
@@ -105,22 +116,39 @@ $rrw = $rs->fetch_assoc();
 
             <!-- Pending DTR Card -->
             <div class="col-xl-3 col-md-6 mb-4">
-                  <a href="approval.php" style="text-decoration: none; color: inherit;"> <!-- Make the card clickable -->
-                    <div class="card h-100">
-                      <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                          <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-uppercase mb-1">Pending DTR</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $pendingDTRCount; ?></div>
-                          </div>
-                          <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-warning"></i>
-                          </div>
-                        </div>
+              <a href="approval.php" style="text-decoration: none; color: inherit;"> <!-- Make the card clickable -->
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Pending DTR</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $pendingDTRCount; ?></div>
+                      </div>
+                      <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
                       </div>
                     </div>
-                  </a>
+                  </div>
                 </div>
+              </a>
+            </div>
+
+            <!-- Total Reports Card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-uppercase mb-1">Total Reports</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $totalReportsCount; ?></div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-envelope fa-2x text-success"></i> <!-- Updated icon for Inbox -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
           </div>
           <!--Row-->

@@ -26,7 +26,6 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Admin Actions</h6>
                 <a class="collapse-item" href="createAdmin.php">Create Admin Account</a>
-              
             </div>
         </div>
     </li>
@@ -116,13 +115,22 @@
         </a>
         <div id="collapseBootstrapcon" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Contribution</h6>
+                <h6 class=" collapse-header">Contribution</h6>
                 <a class="collapse-item" href="createSessionTerm.php">Create Session and Term</a>
             </div>
         </div>
     </li>
 
-    
+    <hr class="sidebar-divider">
+    <div class="sidebar-heading">
+        Messages
+    </div>
+    <li class="nav-item">
+        <a class="nav-link" href="inbox.php">
+            <i class="fas fa-inbox"></i>
+            <span>Inbox</span>
+        </a>
+    </li>
 
     <hr class="sidebar-divider">
 </ul>
