@@ -36,8 +36,11 @@
                         document.write('<p class="collapse-item disabled">Submit Time (Already Submitted)</p>');
                     }
 
-                    // Always show the "View Submitted Time" link
+                    // Always show the "Compose Message" link
                     document.write('<a class="collapse-item" href="reports.php">Compose Message</a>');
+                    
+                    // Add the "Inbox" link
+                    document.write('<a class="collapse-item" href="inbox.php">Inbox</a>');
                 </script>
             </div>
         </div>

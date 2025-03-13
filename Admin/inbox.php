@@ -5,6 +5,30 @@ include '../Includes/session.php';
 // Include database connection
 include '../Includes/dbcon.php'; 
 
+// Function to handle the reply to a report
+function handleReply($conn) {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['replyReportId'])) {
+        $replyReportId = $_POST['replyReportId'];
+        $replyMessage = $_POST['replyMessage'];
+        
+        // Construct admin name from session variables
+        $adminName = $_SESSION['firstName'] . ' ' . $_SESSION['lastName'];
+
+        // Update the report with the reply
+        $replyQuery = "UPDATE tblreports SET reply = ?, adminName = ?, sent_at = NOW(), status = 'replied' WHERE id = ?";
+        $stmt = $conn->prepare($replyQuery);
+        $stmt->bind_param("ssi", $replyMessage, $adminName, $replyReportId);
+
+        if ($stmt->execute()) {
+            return "Reply sent successfully!";
+        } else {
+            return "Error sending reply: " . $stmt->error;
+        }
+
+        $stmt->close();
+    }
+}
+
 // Check if the form has been submitted to update the report status
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reportId'])) {
     $reportId = $_POST['reportId'];
@@ -15,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reportId'])) {
     $stmt->bind_param("i", $reportId);
     
     if ($stmt->execute()) {
-        // Optionally, you can set a success message
         $successMessage = "Report status updated to resolved.";
     } else {
         $errorMessage = "Error updating report status: " . $stmt->error;
@@ -42,8 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['deleteReportId'])) {
     $stmt->close();
 }
 
+// Handle reply submission
+if (isset($_POST['replyReportId'])) {
+    $replyMessage = handleReply($conn);
+}
+
 // Fetch data from tblreports, prioritizing pending reports over resolved ones
-$query = "SELECT id, admissionNumber, fullname, course, report, status, created_at 
+$query = "SELECT id, admissionNumber, fullname, course, report, reply, status, created_at, sent_at 
           FROM tblreports 
           ORDER BY CASE 
               WHEN status = 'pending' THEN 1 
@@ -86,12 +114,20 @@ if (!$result) {
             font-size: 14px;
             color: #555;
         }
+        .reply-content {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #007bff; /* Color for reply text */
+        }
         .timestamp {
             font-size: 12px;
             color: #888;
         }
         .resolved {
             color: green;
+        }
+        .replied {
+            color: blue; /* Color for replied status */
         }
         .delete-icon {
             position: absolute;
@@ -132,18 +168,28 @@ if (!$result) {
                                         <?php
                                         // Loop through the results and display them in the inbox style
                                         while ($row = mysqli_fetch_assoc($result)) {
-                                            echo "<div class='inbox-item' data-toggle='modal' data-target='#reportModal' data-admission='" . htmlspecialchars($row['admissionNumber']) . "' data-fullname='" . htmlspecialchars($row['fullname']) . "' data-course='" . htmlspecialchars($row['course']) . "' data-report='" . htmlspecialchars($row['report']) . "' data-createdat='" . htmlspecialchars($row['created_at']) . "' data-reportid='" . htmlspecialchars($row['id']) . "'>";
+                                            echo "<div class='inbox-item' data-toggle='modal' data-target='#reportModal' data-admission='" . htmlspecialchars($row['admissionNumber']) . "' data-fullname='" . htmlspecialchars($row['fullname']) . "' data-course ='" . htmlspecialchars($row['course']) . "' data-report='" . htmlspecialchars($row['report']) . "' data-reply='" . htmlspecialchars($row['reply']) . "' data-createdat='" . htmlspecialchars($row['created_at']) . "' data-sentat='" . htmlspecialchars($row['sent_at']) . "' data-reportid='" . htmlspecialchars($row['id']) . "'>";
                                             echo "<strong>Name: " . htmlspecialchars($row['fullname']) . "</strong> - Course: " . htmlspecialchars($row['course']);
                                             echo "<div class='report-content'> Message: " . nl2br(htmlspecialchars($row['report'])) . "</div>"; // Display report content
-                                            echo "<div class='timestamp'>Date: " . htmlspecialchars($row['created_at']) . "</div>"; // Display created_at timestamp
+                                            
+                                            // Display reply if it exists
+                                            if (!empty($row['reply'])) {
+                                                echo "<div class='reply-content'>Reply: " . nl2br(htmlspecialchars($row['reply'])) . "</div>"; // Display reply content
+                                            }
+                                            
+                                            // Display created_at timestamp
+                                            echo "<div class='timestamp'>Receive Date: " . htmlspecialchars($row['created_at']) . "</div>"; // Change label to "Receive Date"
                                             
                                             // Check if the status is resolved and display a check icon
                                             if ($row['status'] === 'resolved') {
                                                 echo "<i class='fas fa-check-circle resolved' title='Resolved'></i>";
                                             }
-                                            
+                                            // Check if the status is replied and display a check icon
+                                            if ($row['status'] === 'replied') {
+                                                echo "<i class='fas fa-check-circle replied' title='Replied'></i>";
+                                            }
                                             // Add delete icon
-                                            echo "<i class='fas fa-trash delete-icon' title='Delete' data-reportid='" . htmlspecialchars($row['id']) . "'></i>";
+                                            echo "<i class='fas fa-trash delete-icon' title ='Delete' data-reportid='" . htmlspecialchars($row['id']) . "'></i>";
                                             
                                             echo "</div>";
                                         }
@@ -162,6 +208,7 @@ if (!$result) {
             <?php include "Includes/footer.php"; ?>
             <!-- Footer -->
         </div>
+
     </div>
 
     <!-- Scroll to top -->
@@ -180,18 +227,48 @@ if (!$result) {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>Student ID:</strong> <span id="modalAdmissionNumber"></span></p> <!-- Changed from Admission Number to Student ID -->
+                    <p><strong>Student ID:</strong> <span id="modalAdmissionNumber"></span></p>
                     <p><strong>Full Name:</strong> <span id="modalFullName"></span></p>
                     <p><strong>Course:</strong> <span id="modalCourse"></span></p>
+                    <hr> <!-- Line under the course -->
                     <p><strong>Message:</strong></p>
                     <p id="modalReport"></p>
-                    <p><strong>Date:</strong> <span id="modalCreatedAt"></span></p> <!-- Changed from Created At to Date -->
+                    <p><strong>Receive Date:</strong> <span id="modalCreatedAt"></span></p>
+                    <hr> <!-- Line under the receive date -->
+                    <p><strong>Reply:</strong></p>
+                    <p id="modalReply"></p>
+                    <p><strong>Reply Date:</strong> <span id="modalSentAt"></span></p>
                 </div>
                 <div class="modal-footer">
                     <form method="POST" action="">
                         <input type="hidden" id="reportIdInput" name="reportId" value="">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">OK</button> <!-- Changed from Update Report to OK -->
+                        <button type="submit" class="btn btn-primary">OK</button>
+                        <button type="button" class="btn btn-info" id="replyButton">Reply</button> <!-- Updated Reply button -->
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for replying to reports -->
+    <div class="modal fade" id="replyModal" tabindex="-1" role="dialog" aria-labelledby="replyModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replyModalLabel">Reply to Report</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="">
+                        <input type="hidden" id="replyReportId" name="replyReportId" value="">
+                        <div class="form-group">
+                            <label for="replyMessage">Your Reply:</label>
+                            <textarea class="form-control" id="replyMessage" name="replyMessage" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Reply</button>
                     </form>
                 </div>
             </div>
@@ -205,30 +282,39 @@ if (!$result) {
     <script>
         // jQuery to handle the modal data population
         $('#reportModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget); // Button that triggered the modal
+            var button = $(event.relatedTarget);
             var admissionNumber = button.data('admission');
             var fullname = button.data('fullname');
             var course = button.data('course');
             var report = button.data('report');
-            var createdAt = button.data('createdat'); // Get the created_at data
-            var reportId = button.data('reportid'); // Get the report ID
+            var reply = button.data('reply');
+            var createdAt = button.data('createdat');
+            var sentAt = button.data('sentat');
+            var reportId = button.data('reportid');
 
-            // Update the modal's content
             var modal = $(this);
-            modal.find('#modalAdmissionNumber').text(admissionNumber); // Display Student ID
+            modal.find('#modalAdmissionNumber').text(admissionNumber);
             modal.find('#modalFullName').text(fullname);
             modal.find('#modalCourse').text(course);
             modal.find('#modalReport').text(report);
-            modal.find('#modalCreatedAt').text(createdAt); // Set the created_at in the modal
-            modal.find('#reportIdInput').val(reportId); // Set the report ID in the hidden input
+            modal.find('#modalReply').text(reply); // Display reply in modal
+            modal.find('#modalCreatedAt').text(createdAt); // Display receive date
+            modal.find('#modalSentAt').text(sentAt); // Display reply date
+            modal.find('#reportIdInput').val(reportId);
+        });
+
+        // Handle reply button click to show the reply modal
+        $('#replyButton').on('click', function() {
+            var reportId = $('#reportIdInput').val();
+            $('#replyReportId').val(reportId); // Set the report ID in the reply modal
+            $('#replyModal').modal('show'); // Show the reply modal
         });
 
         // Handle delete icon click using event delegation
         $(document).on('click', '.delete-icon', function(event) {
-            event.stopPropagation(); // Prevent the modal from opening
+            event.stopPropagation();
             var reportId = $(this).data('reportid');
             if (confirm("Are you sure you want to delete this report?")) {
-                // Create a form to submit the delete request
                 var form = $('<form method="POST" action="">');
                 form.append($('<input type="hidden" name="deleteReportId" />').val(reportId));
                 $('body').append(form);
