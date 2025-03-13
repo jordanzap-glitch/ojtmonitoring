@@ -180,7 +180,7 @@ if (!$result) {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>Admission Number:</strong> <span id="modalAdmissionNumber"></span></p>
+                    <p><strong>Student ID:</strong> <span id="modalAdmissionNumber"></span></p> <!-- Changed from Admission Number to Student ID -->
                     <p><strong>Full Name:</strong> <span id="modalFullName"></span></p>
                     <p><strong>Course:</strong> <span id="modalCourse"></span></p>
                     <p><strong>Message:</strong></p>
@@ -215,7 +215,7 @@ if (!$result) {
 
             // Update the modal's content
             var modal = $(this);
-            modal.find('#modalAdmissionNumber').text(admissionNumber);
+            modal.find('#modalAdmissionNumber').text(admissionNumber); // Display Student ID
             modal.find('#modalFullName').text(fullname);
             modal.find('#modalCourse').text(course);
             modal.find('#modalReport').text(report);

@@ -21,7 +21,7 @@
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBootstrapcon4"
            aria-expanded="true" aria-controls="collapseBootstrapcon4">
             <i class="fa fa-calendar-alt"></i>
-            <span>DAILY TIME RECORD</span>
+            <span>DAILY TIME RECORD/MESSAGE</span>
         </a>
         <div id="collapseBootstrapcon4" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
