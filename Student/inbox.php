@@ -5,9 +5,15 @@ include '../Includes/session.php';
 // Include database connection
 include '../Includes/dbcon.php'; 
 
-// Fetch data for the inbox (assuming you have a table for messages)
-$query = "SELECT id, adminName, reply, report, created_at, sent_at FROM tblreports ORDER BY created_at DESC"; // Adjust the query as needed
-$result = mysqli_query($conn, $query);
+// Get the admission number from the session
+$admissionNumber = $_SESSION['admissionNumber']; // Assuming admissionNumber is stored in session
+
+// Fetch data for the inbox for the specific admission number
+$query = "SELECT id, adminName, reply, report, created_at, sent_at FROM tblreports WHERE admissionNumber = ? ORDER BY created_at DESC"; // Adjust the query as needed
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $admissionNumber); // Bind the admission number
+$stmt->execute();
+$result = $stmt->get_result();
 
 if (!$result) {
     die("Query failed: " . mysqli_error($conn));
