@@ -1,4 +1,5 @@
 <?php 
+ob_start();
 error_reporting(0);
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
@@ -268,3 +269,6 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
         </script>
     </body>
 </html>
+<?php
+ob_end_flush();
+?>
