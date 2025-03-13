@@ -6,11 +6,6 @@ $error_message = '';
 $success_message = '';
 
 // Check if the user is logged in
-if (!isset($_SESSION['userId'])) {
-    header("Location: login.php"); // Redirect to login if not logged in
-    exit();
-}
-
 // Fetch the count of pending DTR submissions
 $queryPendingDTR = "SELECT COUNT(*) as pendingCount FROM tbl_weekly_time_entries WHERE status = 'pending'";
 $resultPendingDTR = $conn->query($queryPendingDTR);

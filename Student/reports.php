@@ -6,11 +6,6 @@ $error_message = '';
 $success_message = '';
 
 // Check if the user is logged in
-if (!isset($_SESSION['userId'])) {
-    header("Location: login.php"); // Redirect to login if not logged in
-    exit();
-}
-
 // Retrieve admission number and full name from session
 $admissionNumber = isset($_SESSION['admissionNumber']) ? $_SESSION['admissionNumber'] : '';
 $firstName = isset($_SESSION['firstName']) ? $_SESSION['firstName'] : '';
@@ -33,14 +28,22 @@ if (isset($_POST['submit_report'])) {
 
         // Execute the statement
         if ($stmt->execute()) {
-            $success_message = "Your report has been submitted successfully.";
+            $success_message = "Your message sent successfully.";
         } else {
-            $error_message = "Error submitting your report. Please try again.";
+            $error_message = "Error. Please try again.";
         }
 
         // Close the statement
         $stmt->close();
     }
+}
+
+// Fetch class names from tblclass
+$classQuery = "SELECT className FROM tblclass"; // Adjust the query as needed
+$classResult = mysqli_query($conn, $classQuery);
+
+if (!$classResult) {
+    die("Query failed: " . mysqli_error($conn));
 }
 ?>
 
@@ -83,7 +86,7 @@ if (isset($_POST['submit_report'])) {
                         <div class="col-lg-12">
                             <div class="card mb-4">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary">Submit Your Report</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Message</h6>
                                 </div>
                                 <div class="card-body">
                                     <?php if (!empty($error_message)): ?>
@@ -103,15 +106,21 @@ if (isset($_POST['submit_report'])) {
                                             <label for="fullname">Full Name:</label>
                                             <input type="text" class="form-control" id="fullname" name="fullname" value="<?php echo htmlspecialchars($fullname); ?>" readonly>
                                             <input type="text" class="form-control" id="admissionNumber" name="admissionNumber" value="<?php echo htmlspecialchars($admissionNumber); ?>" hidden>
+                                        </div>
                                         <div class="form-group">
                                             <label for="course">Course:</label>
-                                            <input type="text" class="form-control" id="course" name="course" required>
+                                            <select class="form-control" id="course" name="course" required>
+                                                <option value="">Select a course</option>
+                                                <?php while ($classRow = mysqli_fetch_assoc($classResult)): ?>
+                                                    <option value="<?php echo htmlspecialchars($classRow['className']); ?>"><?php echo htmlspecialchars($classRow['className']); ?></option>
+                                                <?php endwhile; ?>
+                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <label for="report">Message:</label>
                                             <textarea class="form-control" id="report" name="report" rows="4" required></textarea>
                                         </div>
-                                        <button type="submit" name="submit_report" class="btn btn-primary">Submit Report</button>
+                                        <button type="submit" name="submit_report" class="btn btn-primary">Send</button>
                                     </form>
                                 </div>
                             </div>
@@ -130,7 +139,7 @@ if (isset($_POST['submit_report'])) {
     <!-- Scroll to top -->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
-    </ a>
+    </a>
 
     <script src="../vendor/jquery/jquery.min.js"></script>
     <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -139,3 +148,7 @@ if (isset($_POST['submit_report'])) {
 </body>
 
 </html>
+<?php
+// Close the database connection
+mysqli_close($conn);
+?>

@@ -6,13 +6,13 @@ include '../Includes/session.php';
 include '../Includes/dbcon.php'; 
 
 // Check if the form has been submitted to update the report status
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admissionNumber'])) {
-    $admissionNumber = $_POST['admissionNumber'];
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reportId'])) {
+    $reportId = $_POST['reportId'];
     
     // Update the status to 'resolved'
-    $updateQuery = "UPDATE tblreports SET status = 'resolved' WHERE admissionNumber = ?";
+    $updateQuery = "UPDATE tblreports SET status = 'resolved' WHERE id = ?";
     $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param("s", $admissionNumber);
+    $stmt->bind_param("i", $reportId);
     
     if ($stmt->execute()) {
         // Optionally, you can set a success message
@@ -24,8 +24,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admissionNumber'])) {
     $stmt->close();
 }
 
-// Fetch data from tblreports
-$query = "SELECT admissionNumber, fullname, course, report, status, created_at FROM tblreports"; // Adjust the query as needed
+// Check if the delete request has been submitted
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['deleteReportId'])) {
+    $deleteReportId = $_POST['deleteReportId'];
+    
+    // Delete the report
+    $deleteQuery = "DELETE FROM tblreports WHERE id = ?";
+    $stmt = $conn->prepare($deleteQuery);
+    $stmt->bind_param("i", $deleteReportId);
+    
+    if ($stmt->execute()) {
+        $successMessage = "Report deleted successfully.";
+    } else {
+        $errorMessage = "Error deleting report: " . $stmt->error;
+    }
+    
+    $stmt->close();
+}
+
+// Fetch data from tblreports, prioritizing pending reports over resolved ones
+$query = "SELECT id, admissionNumber, fullname, course, report, status, created_at 
+          FROM tblreports 
+          ORDER BY CASE 
+              WHEN status = 'pending' THEN 1 
+              WHEN status = 'resolved' THEN 2 
+              ELSE 3 
+          END, created_at DESC"; // Adjust the query as needed
 $result = mysqli_query($conn, $query);
 
 if (!$result) {
@@ -52,6 +76,7 @@ if (!$result) {
             margin-bottom: 10px;
             cursor: pointer;
             transition: background-color 0.3s;
+            position: relative; /* Added for positioning the delete icon */
         }
         .inbox-item:hover {
             background-color: #f1f1f1;
@@ -67,6 +92,13 @@ if (!$result) {
         }
         .resolved {
             color: green;
+        }
+        .delete-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: red;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -100,7 +132,7 @@ if (!$result) {
                                         <?php
                                         // Loop through the results and display them in the inbox style
                                         while ($row = mysqli_fetch_assoc($result)) {
-                                            echo "<div class='inbox-item' data-toggle='modal' data-target='#reportModal' data-admission='" . htmlspecialchars($row['admissionNumber']) . "' data-fullname='" . htmlspecialchars($row['fullname']) . "' data-course='" . htmlspecialchars($row['course']) . "' data-report='" . htmlspecialchars($row['report']) . "' data-createdat='" . htmlspecialchars($row['created_at']) . "'>";
+                                            echo "<div class='inbox-item' data-toggle='modal' data-target='#reportModal' data-admission='" . htmlspecialchars($row['admissionNumber']) . "' data-fullname='" . htmlspecialchars($row['fullname']) . "' data-course='" . htmlspecialchars($row['course']) . "' data-report='" . htmlspecialchars($row['report']) . "' data-createdat='" . htmlspecialchars($row['created_at']) . "' data-reportid='" . htmlspecialchars($row['id']) . "'>";
                                             echo "<strong>Name: " . htmlspecialchars($row['fullname']) . "</strong> - Course: " . htmlspecialchars($row['course']);
                                             echo "<div class='report-content'> Message: " . nl2br(htmlspecialchars($row['report'])) . "</div>"; // Display report content
                                             echo "<div class='timestamp'>Date: " . htmlspecialchars($row['created_at']) . "</div>"; // Display created_at timestamp
@@ -109,6 +141,9 @@ if (!$result) {
                                             if ($row['status'] === 'resolved') {
                                                 echo "<i class='fas fa-check-circle resolved' title='Resolved'></i>";
                                             }
+                                            
+                                            // Add delete icon
+                                            echo "<i class='fas fa-trash delete-icon' title='Delete' data-reportid='" . htmlspecialchars($row['id']) . "'></i>";
                                             
                                             echo "</div>";
                                         }
@@ -154,7 +189,7 @@ if (!$result) {
                 </div>
                 <div class="modal-footer">
                     <form method="POST" action="">
-                        <input type="hidden" id="admissionNumberInput" name="admissionNumber" value="">
+                        <input type="hidden" id="reportIdInput" name="reportId" value="">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">OK</button> <!-- Changed from Update Report to OK -->
                     </form>
@@ -176,6 +211,7 @@ if (!$result) {
             var course = button.data('course');
             var report = button.data('report');
             var createdAt = button.data('createdat'); // Get the created_at data
+            var reportId = button.data('reportid'); // Get the report ID
 
             // Update the modal's content
             var modal = $(this);
@@ -184,7 +220,20 @@ if (!$result) {
             modal.find('#modalCourse').text(course);
             modal.find('#modalReport').text(report);
             modal.find('#modalCreatedAt').text(createdAt); // Set the created_at in the modal
-            modal.find('#admissionNumberInput').val(admissionNumber); // Set the admission number in the hidden input
+            modal.find('#reportIdInput').val(reportId); // Set the report ID in the hidden input
+        });
+
+        // Handle delete icon click using event delegation
+        $(document).on('click', '.delete-icon', function(event) {
+            event.stopPropagation(); // Prevent the modal from opening
+            var reportId = $(this).data('reportid');
+            if (confirm("Are you sure you want to delete this report?")) {
+                // Create a form to submit the delete request
+                var form = $('<form method="POST" action="">');
+                form.append($('<input type="hidden" name="deleteReportId" />').val(reportId));
+                $('body').append(form);
+                form.submit();
+            }
         });
     </script>
 </body>
