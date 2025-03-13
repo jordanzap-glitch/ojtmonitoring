@@ -9,7 +9,7 @@ include '../Includes/dbcon.php';
 $admissionNumber = $_SESSION['admissionNumber']; // Assuming admissionNumber is stored in session
 
 // Fetch data for the inbox for the specific admission number
-$query = "SELECT id, adminName, reply, report, created_at, sent_at FROM tblreports WHERE admissionNumber = ? ORDER BY created_at DESC"; // Adjust the query as needed
+$query = "SELECT id, adminName, reply, report, created_at, sent_at, status FROM tblreports WHERE admissionNumber = ? ORDER BY created_at DESC"; // Adjust the query as needed
 $stmt = $conn->prepare($query);
 $stmt->bind_param("s", $admissionNumber); // Bind the admission number
 $stmt->execute();
@@ -17,6 +17,26 @@ $result = $stmt->get_result();
 
 if (!$result) {
     die("Query failed: " . mysqli_error($conn));
+}
+
+// Check if the AJAX request to update status is made
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id']) && isset($_POST['status'])) {
+    $reportId = $_POST['id'];
+    $status = $_POST['status'];
+
+    // Update the status to "seen"
+    $updateQuery = "UPDATE tblreports SET status = ? WHERE id = ?";
+    $updateStmt = $conn->prepare($updateQuery);
+    $updateStmt->bind_param("si", $status, $reportId);
+
+    if ($updateStmt->execute()) {
+        echo "Status updated successfully.";
+    } else {
+        echo "Error updating status: " . $updateStmt->error;
+    }
+
+    $updateStmt->close();
+    exit; // Exit after handling the AJAX request
 }
 ?>
 
@@ -39,6 +59,7 @@ if (!$result) {
             margin-bottom: 10px;
             cursor: pointer;
             transition: background-color 0.3s;
+            position: relative; /* Added for positioning the check icon */
         }
         .inbox-item:hover {
             background-color: #f1f1f1;
@@ -57,6 +78,13 @@ if (!$result) {
             margin-top: 5px;
             font-size: 14px;
             color: #555;
+        }
+        .seen-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: green;
+            display: none; /* Initially hidden */
         }
     </style>
 </head>
@@ -96,6 +124,12 @@ if (!$result) {
                                             echo "<div class='timestamp'>Receive Date: " . htmlspecialchars($row['sent_at']) . "</div>"; // Display sent_at timestamp
                                             echo "<div class='message-content'>Your Message: " . htmlspecialchars($row['report']) . "</div>";
                                             echo "<div class='timestamp'>Sent Date: " . htmlspecialchars($row['created_at']) . "</div>";  // Display created_at timestamp
+                                            
+                                            // Check if the status is seen and display the check icon
+                                            if ($row['status'] === 'seen') {
+                                                echo "<i class='fas fa-check-circle seen-icon' title='Seen'></i>";
+                                            }
+                                            
                                             echo "</div>";
                                         }
                                         ?>
@@ -161,6 +195,7 @@ if (!$result) {
             var reply = button.data('reply');
             var createdAt = button.data('createdat'); // Get created_at for modal
             var sentAt = button.data('sentat'); // Get sent_at for modal
+            var reportId = button.data('id'); // Get report ID
 
             // Update the modal's content
             var modal = $(this);
@@ -169,6 +204,19 @@ if (!$result) {
             modal.find('#modalReply').text(reply);
             modal.find('#modalCreatedAt').text(createdAt); // Set created_at in modal
             modal.find('#modalSentAt').text(sentAt); // Set sent_at in modal
+
+            // AJAX call to update the status to "seen"
+            $.ajax({
+                url: '', // This will be the same file
+                type: 'POST',
+                data: { id: reportId, status: 'seen' },
+                success: function(response) {
+                    console.log(response); // Optional: log the response for debugging
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error updating status: " + error);
+                }
+            });
         });
     </script>
 </body>

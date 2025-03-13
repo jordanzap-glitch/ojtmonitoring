@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 17, 2024 at 07:17 PM
+-- Generation Time: Mar 13, 2025 at 09:46 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -32,15 +32,17 @@ CREATE TABLE `tbladmin` (
   `firstName` varchar(50) NOT NULL,
   `lastName` varchar(50) NOT NULL,
   `emailAddress` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL
+  `password` varchar(50) NOT NULL,
+  `dateCreated` date DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `tbladmin`
 --
 
-INSERT INTO `tbladmin` (`Id`, `firstName`, `lastName`, `emailAddress`, `password`) VALUES
-(1, 'Admin', '', 'admin@mail.com', '123');
+INSERT INTO `tbladmin` (`Id`, `firstName`, `lastName`, `emailAddress`, `password`, `dateCreated`) VALUES
+(1, 'Admin', 'jordan', 'srcadmin@gmail.com', '1233', NULL),
+(6, 'jordan', 'zapanta', 'jordan@gmail.com', '123', '2025-03-06');
 
 -- --------------------------------------------------------
 
@@ -81,7 +83,7 @@ CREATE TABLE `tblclass` (
 --
 
 INSERT INTO `tblclass` (`Id`, `className`) VALUES
-(7, 'BSIS');
+(1, 'BSIS');
 
 -- --------------------------------------------------------
 
@@ -133,15 +135,17 @@ CREATE TABLE `tblcompany` (
   `comp_name` varchar(255) NOT NULL,
   `contact_person` varchar(255) NOT NULL,
   `contact_num` varchar(255) NOT NULL,
-  `comp_address` varchar(255) NOT NULL
+  `comp_address` varchar(255) NOT NULL,
+  `comp_link` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `tblcompany`
 --
 
-INSERT INTO `tblcompany` (`Id`, `comp_name`, `contact_person`, `contact_num`, `comp_address`) VALUES
-(2, 'Hiraya Software Solution', 'Katchie Lama', '09126788908', 'Sa May Doorn');
+INSERT INTO `tblcompany` (`Id`, `comp_name`, `contact_person`, `contact_num`, `comp_address`, `comp_link`) VALUES
+(1, 'Hiraya Software Solution', 'Dc', '1234', 'Santa Rita', ''),
+(2, 'jordan', 'Dcc', '1234', 'Santa Rita', 'https://src.edu.ph/');
 
 -- --------------------------------------------------------
 
@@ -159,25 +163,57 @@ CREATE TABLE `tblenroll` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tblreply`
+--
+
+CREATE TABLE `tblreply` (
+  `id` int(11) NOT NULL,
+  `emp_id` varchar(255) DEFAULT NULL,
+  `fullname` varchar(255) DEFAULT NULL,
+  `message` varchar(255) DEFAULT NULL,
+  `admissionNumber` varchar(255) DEFAULT NULL,
+  `created_at` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblreports`
+--
+
+CREATE TABLE `tblreports` (
+  `id` int(11) NOT NULL,
+  `admissionNumber` varchar(50) DEFAULT NULL,
+  `fullname` varchar(100) NOT NULL,
+  `course` varchar(100) NOT NULL,
+  `report` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `reply` text DEFAULT NULL,
+  `adminName` varchar(255) DEFAULT NULL,
+  `sent_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('pending','resolved','replied','seen') DEFAULT 'pending'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tblreports`
+--
+
+INSERT INTO `tblreports` (`id`, `admissionNumber`, `fullname`, `course`, `report`, `created_at`, `reply`, `adminName`, `sent_at`, `status`) VALUES
+(46, '1001', 'test test', 'BSIS', 'jordan', '2025-03-13 06:47:38', 'zapanta?', 'Admin jordan', '2025-03-13 06:48:05', 'seen'),
+(47, '1001', 'test test', 'BSIS', 'qweqweqwe', '2025-03-13 08:37:33', 'ok', 'Admin jordan', '2025-03-13 08:37:55', 'seen');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tblsessionterm`
 --
 
 CREATE TABLE `tblsessionterm` (
   `Id` int(10) NOT NULL,
   `sessionName` varchar(50) NOT NULL,
-  `termId` varchar(50) NOT NULL,
   `isActive` varchar(10) NOT NULL,
   `dateCreated` varchar(50) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Dumping data for table `tblsessionterm`
---
-
-INSERT INTO `tblsessionterm` (`Id`, `sessionName`, `termId`, `isActive`, `dateCreated`) VALUES
-(1, '2021/2022', '1', '0', '2022-10-31'),
-(3, '2021/2022', '2', '0', '2022-10-31'),
-(4, '2024/2025', '3', '1', '2024-09-08');
 
 -- --------------------------------------------------------
 
@@ -205,17 +241,27 @@ CREATE TABLE `tblstudent` (
 
 CREATE TABLE `tblstudents` (
   `Id` int(10) NOT NULL,
-  `admissionNumber` varchar(255) NOT NULL,
-  `firstName` varchar(255) NOT NULL,
-  `lastName` varchar(255) NOT NULL,
-  `classId` varchar(10) NOT NULL,
-  `classArmId` varchar(10) NOT NULL,
-  `contact` varchar(50) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `address` varchar(255) NOT NULL,
-  `password` varchar(50) NOT NULL,
-  `dateCreated` varchar(50) NOT NULL
+  `admissionNumber` varchar(255) DEFAULT NULL,
+  `firstName` varchar(255) DEFAULT NULL,
+  `lastName` varchar(255) DEFAULT NULL,
+  `classId` varchar(10) DEFAULT NULL,
+  `contact` varchar(50) DEFAULT NULL,
+  `comp_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `password` varchar(50) DEFAULT NULL,
+  `dateCreated` varchar(50) DEFAULT NULL,
+  `render_time` int(255) DEFAULT NULL,
+  `remaining_time` int(255) DEFAULT NULL,
+  `comp_link` varchar(255) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `tblstudents`
+--
+
+INSERT INTO `tblstudents` (`Id`, `admissionNumber`, `firstName`, `lastName`, `classId`, `contact`, `comp_name`, `email`, `address`, `password`, `dateCreated`, `render_time`, `remaining_time`, `comp_link`) VALUES
+(22, '1001', 'test', 'test', '1', '123', 'Hiraya Software Solution', 'student@gmail.com', '123', '123', '2025-03-11', 500, 500, '');
 
 -- --------------------------------------------------------
 
@@ -294,7 +340,36 @@ CREATE TABLE `tbluser` (
 --
 
 INSERT INTO `tbluser` (`Id`, `emailAddress`, `password`, `user_type`) VALUES
-(3, 'admin@mail.com', '123', 'Admin');
+(29, 'student@gmail.com', '123', 'Student');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbl_weekly_time_entries`
+--
+
+CREATE TABLE `tbl_weekly_time_entries` (
+  `id` int(255) NOT NULL,
+  `week_start_date` date NOT NULL,
+  `monday_time` float DEFAULT 0,
+  `tuesday_time` float DEFAULT 0,
+  `wednesday_time` float DEFAULT 0,
+  `thursday_time` float DEFAULT 0,
+  `friday_time` float DEFAULT 0,
+  `saturday_time` int(8) DEFAULT NULL,
+  `remaining_time` int(255) DEFAULT NULL,
+  `total_hours` int(255) DEFAULT NULL,
+  `bon_time` int(255) NOT NULL DEFAULT 0,
+  `student_fullname` varchar(100) NOT NULL,
+  `course` varchar(100) NOT NULL,
+  `sessionId` int(255) DEFAULT NULL,
+  `comp_name` varchar(255) DEFAULT NULL,
+  `comp_link` varchar(255) DEFAULT NULL,
+  `date_created` datetime DEFAULT current_timestamp(),
+  `admissionNumber` varchar(255) NOT NULL,
+  `image_link` varchar(255) DEFAULT NULL,
+  `status` enum('submitted','not submitted','pending') DEFAULT 'not submitted'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -343,6 +418,12 @@ ALTER TABLE `tblenroll`
   ADD PRIMARY KEY (`Id`);
 
 --
+-- Indexes for table `tblreports`
+--
+ALTER TABLE `tblreports`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `tblsessionterm`
 --
 ALTER TABLE `tblsessionterm`
@@ -385,6 +466,12 @@ ALTER TABLE `tbluser`
   ADD PRIMARY KEY (`Id`);
 
 --
+-- Indexes for table `tbl_weekly_time_entries`
+--
+ALTER TABLE `tbl_weekly_time_entries`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -392,7 +479,7 @@ ALTER TABLE `tbluser`
 -- AUTO_INCREMENT for table `tbladmin`
 --
 ALTER TABLE `tbladmin`
-  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `tblattendance`
@@ -404,7 +491,7 @@ ALTER TABLE `tblattendance`
 -- AUTO_INCREMENT for table `tblclass`
 --
 ALTER TABLE `tblclass`
-  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `tblclassarms`
@@ -416,7 +503,7 @@ ALTER TABLE `tblclassarms`
 -- AUTO_INCREMENT for table `tblclassteacher`
 --
 ALTER TABLE `tblclassteacher`
-  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `tblcompany`
@@ -431,10 +518,16 @@ ALTER TABLE `tblenroll`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `tblreports`
+--
+ALTER TABLE `tblreports`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+
+--
 -- AUTO_INCREMENT for table `tblsessionterm`
 --
 ALTER TABLE `tblsessionterm`
-  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `tblstudent`
@@ -446,7 +539,7 @@ ALTER TABLE `tblstudent`
 -- AUTO_INCREMENT for table `tblstudents`
 --
 ALTER TABLE `tblstudents`
-  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `Id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `tblsubmit`
@@ -470,7 +563,13 @@ ALTER TABLE `tblterm`
 -- AUTO_INCREMENT for table `tbluser`
 --
 ALTER TABLE `tbluser`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+
+--
+-- AUTO_INCREMENT for table `tbl_weekly_time_entries`
+--
+ALTER TABLE `tbl_weekly_time_entries`
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
