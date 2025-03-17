@@ -56,16 +56,24 @@ if (isset($_POST['submit_time'])) {
     if ($date->format('N') != 1) { // 1 means Monday
         $statusMsg = "<div class='alert alert-danger'>The selected date must be a Monday.</div>";
     } else {
-        // Check if today is Friday, Saturday, or Sunday
-        $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
-        if ($currentDay < 5) { // If today is before Friday
-            $statusMsg = "<div class='alert alert-danger'>Submissions can only be made from Friday to Sunday.</div>";
-        } else {
-            // Check if a submission already exists for the current week
-            $checkEntryQuery = "SELECT * FROM tbl_weekly_time_entries WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
-            $checkEntryResult = mysqli_query($conn, $checkEntryQuery);
+        // Check if a submission already exists for the current week
+        $checkEntryQuery = "SELECT * FROM tbl_weekly_time_entries WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
+        $checkEntryResult = mysqli_query($conn, $checkEntryQuery);
 
-            if (mysqli_num_rows($checkEntryResult) > 0) {
+        // Check the status of the last submission
+        $lastSubmissionQuery = "SELECT status FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber' ORDER BY date_created DESC LIMIT 1";
+        $lastSubmissionResult = mysqli_query($conn, $lastSubmissionQuery);
+        $lastStatus = null;
+
+        if ($lastSubmissionRow = mysqli_fetch_assoc($lastSubmissionResult)) {
+            $lastStatus = $lastSubmissionRow['status'];
+        }
+
+        // Allow submission if the last status is denied or if today is Friday to Sunday
+        $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
+        if ($lastStatus === 'denied' || ($currentDay >= 5)) {
+            // Proceed with the rest of the code
+            if (mysqli_num_rows($checkEntryResult) > 0 && $lastStatus !== 'denied') {
                 $statusMsg = "<div class='alert alert-danger'>You have already submitted your weekly time for this week.</div>";
             } else {
                 // Proceed with the rest of the code
@@ -113,6 +121,8 @@ if (isset($_POST['submit_time'])) {
                 $_SESSION['last_submission_date'] = date('Y-m-d'); // Store today's date
                 $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
             }
+        } else {
+            $statusMsg = "<div class='alert alert-danger'>Submissions can only be made from Friday to Sunday unless the last submission was denied.</div>";
         }
     }
 }
@@ -218,7 +228,7 @@ if (isset($_POST['submit_time'])) {
                         </div>
                     </div>
                     <div class="form-group row mb-3">
-                        <div class=" col-xl-6">
+                        <div class="col-xl-6">
                             <label class="form-control-label">Monday Time (in hours)<span class="text-danger ml-2">*</span></label>
                             <input type="number" class="form-control" name="monday_time" min="0" max="8" step="0.1" required>
                         </div>
