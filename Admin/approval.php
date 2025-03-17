@@ -437,7 +437,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                 $('#dataTableHover').DataTable({
                     "paging": true, // Enable pagination
                     "lengthChange": true, // Allow changing the number of records per page
-                    "searching": false, // Enable searching
+                    "searching": true, // Enable searching
                     "ordering": false, // Enable ordering
                     "info": true, // Show info about the table
                     "autoWidth": false // Disable auto width
