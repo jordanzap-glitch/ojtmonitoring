@@ -163,6 +163,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
 
                     <!-- Search and Sort Form -->
                     <form method="post" class="mb-3">
+                        <div ```php
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <input type="text" name="search_term" class="form-control" placeholder="Search by Student Full Name" value="<?php echo htmlspecialchars($searchTerm); ?>">
@@ -217,8 +218,9 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                     <th>Total Hours</th>
                                     <th>Bonus Time</th>
                                     <th>Remaining Time</th>
-                                    <th>Render Time</th> <!-- New column for Render Time -->
-                                    <th>DTR Image Link</th> <!-- Updated column label -->
+                                    <th>Render Time</th>
+                                    <th>Date Submitted</th> <!-- New column for Date Created -->
+                                    <th>DTR Image Link</th>
                                     <th>Approve</th>
                                     <th>Deny</th>
                                 </tr>
@@ -251,27 +253,27 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <td>
                                                 <form method="post" class="d-inline">
                                                     <input type="hidden" name="entry_id" value="<?php echo $row['id']; ?>">
-                                                    <input type="number" name="bonus_time" value="<?php echo $row['bon_time']; ?>" class="form-control" style="width: 80px; display: inline;">
+                                                    <input type="number" name="bonus_time" value="<?php echo $row['bon_time']; ?>" class="form-control" style="width: 80px ; display: inline;">
                                                     <button type="submit" name="update_bonus" class="btn btn-warning btn-sm">Update</button>
                                                 </form>
                                             </td>
                                             <td><?php echo $row['remaining_time']; ?></td>
-                                            <td><?php echo $row['render_time']; ?></td> <!-- Display Render Time -->
+                                            <td><?php echo $row['render_time']; ?></td>
+                                            <td><?php echo $row['date_created']; ?></td> <!-- Display Date Created -->
                                             <td>
-                                                <a href="<?php echo htmlspecialchars($row['image_link']); ?>" target="_blank" class="btn btn-info btn-sm">View Image</a> <!-- Button to view image link -->
+                                                <a href="<?php echo htmlspecialchars($row['image_link']); ?>" target="_blank" class="btn btn-info btn-sm">View Image</a>
                                             </td>
                                             <td>
                                                 <a href="?action=approve&Id=<?php echo $row['id']; ?>" class="btn btn-success">Approve</a>
-                                               
                                             </td>
                                             <td>
-                                                <a href="?action=deny&Id=<?php echo $row['id']; ?>" class="btn btn-danger">Deny</a> <!-- Deny button -->
+                                                <a href="?action=deny&Id=<?php echo $row['id']; ?>" class="btn btn-danger">Deny</a>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="19" class="text-center">No pending submissions.</td>
+                                        <td colspan="20" class="text-center">No pending submissions.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -431,21 +433,20 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
         <script src="../vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
         <!-- Page level custom scripts -->
-
         <script>
             $(document).ready(function () {
                 $('#dataTableHover').DataTable({
-                    "paging": true, // Enable pagination
-                    "lengthChange": true, // Allow changing the number of records per page
-                    "searching": true, // Enable searching
-                    "ordering": false, // Enable ordering
-                    "info": true, // Show info about the table
-                    "autoWidth": false // Disable auto width
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": false,
+                    "info": true,
+                    "autoWidth": false
                 });
                 $('#approvedTable').DataTable({
                     "paging": true,
                     "lengthChange": true,
-                    "searching": true, // Enable searching
+                    "searching": true,
                     "ordering": false,
                     "info": true,
                     "autoWidth": false
@@ -453,7 +454,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                 $('#deniedTable').DataTable({
                     "paging": true,
                     "lengthChange": true,
-                    "searching": true, // Enable searching
+                    "searching": true,
                     "ordering": false,
                     "info": true,
                     "autoWidth": false
@@ -464,4 +465,4 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
 </html>
 <?php
 ob_end_flush();
-?> 
+?>
