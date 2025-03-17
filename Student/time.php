@@ -71,7 +71,7 @@ if (isset($_POST['submit_time'])) {
 
         // Allow submission if the last status is denied or if today is Friday to Sunday
         $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
-        if ($lastStatus === 'denied' || ($currentDay >= 5)) {
+        if ($lastStatus === 'denied' || ($currentDay >= 1)) {
             // Proceed with the rest of the code
             if (mysqli_num_rows($checkEntryResult) > 0 && $lastStatus !== 'denied') {
                 $statusMsg = "<div class='alert alert-danger'>You have already submitted your weekly time for this week.</div>";
@@ -223,7 +223,7 @@ if (isset($_POST['submit_time'])) {
                     </div>
                         <div class="col-xl-6">
                             <label class="form-control-label">Week Start Date (Select Monday)<span class="text-danger ml-2">*</span></label>
-                            <input type="date" class="form-control" name="week_start_date" >
+                            <input type="date" class="form-control" name="week_start_date" readonly>
                             <small class="form-text text-muted">Please select a Monday as the start date.</small>
                         </div>
                     </div>
