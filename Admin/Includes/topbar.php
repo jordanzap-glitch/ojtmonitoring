@@ -60,7 +60,7 @@ $resultFetchReports = $conn->query($queryFetchReports);
                 <!-- Counter for pending reports -->
                 <span class="badge badge-danger badge-counter"><?php echo $totalPendingReportsCount; ?></span>
             </a>
-            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="reportsDropdown" style="max-height: 300px; overflow-y: auto;">
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="reportsDropdown">
                 <h6 class="dropdown-header">Pending Reports Notifications:</h6>
                 <div class="dropdown-divider"></div>
                 <?php if ($resultFetchReports->num_rows > 0): ?>
