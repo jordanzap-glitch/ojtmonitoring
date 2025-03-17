@@ -4,12 +4,14 @@ error_reporting(0);
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
 
-// Initialize search variable
+// Initialize search variables
 $searchTerm = '';
 $selectedCourse = '';
 $selectedCompany = '';
+$searchApprovedTerm = '';
+$searchDeniedTerm = '';
 
-// Check if a search term has been submitted
+// Check if a search term has been submitted for pending submissions
 if (isset($_POST['search'])) {
     $searchTerm = mysqli_real_escape_string($conn, $_POST['search_term']);
 }
@@ -94,12 +96,20 @@ if (!empty($selectedCompany)) {
 $query .= " ORDER BY w.course, w.comp_name"; // Sort by course and company name
 $result = mysqli_query($conn, $query);
 
-// Fetch approved submissions
+// Fetch approved submissions with search functionality
 $approvedQuery = "SELECT * FROM tbl_weekly_time_entries WHERE status = 'submitted'";
+if (isset($_POST['search_approved_btn']) && !empty($_POST['search_approved'])) {
+    $searchApprovedTerm = mysqli_real_escape_string($conn, $_POST['search_approved']);
+    $approvedQuery .= " AND student_fullname LIKE '%$searchApprovedTerm%'";
+}
 $approvedResult = mysqli_query($conn, $approvedQuery);
 
-// Fetch denied submissions
+// Fetch denied submissions with search functionality
 $deniedQuery = "SELECT * FROM tbl_weekly_time_entries WHERE status = 'denied'";
+if (isset($_POST['search_denied_btn']) && !empty($_POST['search_denied'])) {
+    $searchDeniedTerm = mysqli_real_escape_string($conn, $_POST['search_denied']);
+    $deniedQuery .= " AND student_fullname LIKE '%$searchDeniedTerm%'";
+}
 $deniedResult = mysqli_query($conn, $deniedQuery);
 
 // Fetch distinct courses for the dropdown
@@ -252,10 +262,10 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             </td>
                                             <td>
                                                 <a href="?action=approve&Id=<?php echo $row['id']; ?>" class="btn btn-success">Approve</a>
-                                                
+                                               
                                             </td>
                                             <td>
-                                            <a href="?action=deny&Id=<?php echo $row['id']; ?>" class="btn btn-danger">Deny</a> <!-- Deny button -->
+                                                <a href="?action=deny&Id=<?php echo $row['id']; ?>" class="btn btn-danger">Deny</a> <!-- Deny button -->
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
@@ -269,10 +279,20 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                     </div>
                     <!---Container Fluid-->
                 </div>
-                                    <br><br><br><br><br><br>
+                    <br><br><br><br><br><br>
                 <!-- Approved Submissions Table -->
                 <div class="container-fluid" id="container-wrapper">
                     <h2 class="h4 mb-4">Approved Submissions</h2>
+                    <form method="post" class="mb-3">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <input type="text" name="search_approved" class="form-control" placeholder="Search Approved by Full Name" value="<?php echo htmlspecialchars($searchApprovedTerm); ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-primary" type="submit" name="search_approved_btn">Search</button>
+                            </div>
+                        </div>
+                    </form>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table" id="approvedTable">
                             <thead>
@@ -291,8 +311,17 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (mysqli_num_rows($approvedResult) > 0): ?>
-                                    <?php $sn = 1; while ($row = mysqli_fetch_assoc($approvedResult)): ?>
+                                <?php 
+                                // Fetch approved submissions with search functionality
+                                $approvedQuery = "SELECT * FROM tbl_weekly_time_entries WHERE status = 'submitted'";
+                                if (isset($_POST['search_approved_btn']) && !empty($_POST['search_approved'])) {
+                                    $searchApprovedTerm = mysqli_real_escape_string($conn, $_POST['search_approved']);
+                                    $approvedQuery .= " AND student_fullname LIKE '%$searchApprovedTerm%'";
+                                }
+                                $approvedResult = mysqli_query($conn, $approvedQuery);
+
+                                if (mysqli_num_rows($approvedResult) > 0): 
+                                    $sn = 1; while ($row = mysqli_fetch_assoc($approvedResult)): ?>
                                         <tr>
                                             <td><?php echo $sn++; ?></td>
                                             <td><?php echo $row['week_start_date']; ?></td>
@@ -325,9 +354,20 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                     </div>
                 </div>
                 <br><br><br><br><br><br>
+
                 <!-- Denied Submissions Table -->
                 <div class="container-fluid" id="container-wrapper">
                     <h2 class="h4 mb-4">Denied Submissions</h2>
+                    <form method="post" class="mb-3">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <input type="text" name="search_denied" class="form-control" placeholder="Search Denied by Full Name" value="<?php echo htmlspecialchars($searchDeniedTerm); ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-primary" type="submit" name="search_denied_btn">Search</button>
+                            </div>
+                        </div>
+                    </form>
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table" id="deniedTable">
                             <thead>
@@ -346,8 +386,17 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (mysqli_num_rows($deniedResult) > 0): ?>
-                                    <?php $sn = 1; while ($row = mysqli_fetch_assoc($deniedResult)): ?>
+                                <?php 
+                                // Fetch denied submissions with search functionality
+                                $deniedQuery = "SELECT * FROM tbl_weekly_time_entries WHERE status = 'denied'";
+                                if (isset($_POST['search_denied_btn']) && !empty($_POST['search_denied'])) {
+                                    $searchDeniedTerm = mysqli_real_escape_string($conn, $_POST['search_denied']);
+                                    $deniedQuery .= " AND student_fullname LIKE '%$searchDeniedTerm%'";
+                                }
+                                $deniedResult = mysqli_query($conn, $deniedQuery);
+
+                                if (mysqli_num_rows($deniedResult) > 0): 
+                                    $sn = 1; while ($row = mysqli_fetch_assoc($deniedResult)): ?>
                                         <tr>
                                             <td><?php echo $sn++; ?></td>
                                             <td><?php echo $row['week_start_date']; ?></td>
@@ -400,6 +449,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
         <script src="../vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
         <!-- Page level custom scripts -->
+
         <script>
             $(document).ready(function () {
                 $('#dataTableHover').DataTable({
@@ -413,7 +463,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                 $('#approvedTable').DataTable({
                     "paging": true,
                     "lengthChange": true,
-                    "searching": false,
+                    "searching": true, // Enable searching
                     "ordering": false,
                     "info": true,
                     "autoWidth": false
@@ -421,7 +471,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                 $('#deniedTable').DataTable({
                     "paging": true,
                     "lengthChange": true,
-                    "searching": false,
+                    "searching": true, // Enable searching
                     "ordering": false,
                     "info": true,
                     "autoWidth": false
@@ -432,4 +482,4 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
 </html>
 <?php
 ob_end_flush();
-?>
+?> 
