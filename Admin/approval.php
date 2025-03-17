@@ -52,6 +52,19 @@ if (isset($_GET['action']) && $_GET['action'] == 'approve' && isset($_GET['Id'])
     }
 }
 
+// Deny submission
+if (isset($_GET['action']) && $_GET['action'] == 'deny' && isset($_GET['Id'])) {
+    $entryId = $_GET['Id'];
+
+    // Update the status to 'denied'
+    $updateEntryQuery = "UPDATE tbl_weekly_time_entries SET status = 'denied' WHERE id = '$entryId'";
+    mysqli_query($conn, $updateEntryQuery);
+
+    // Redirect or show success message
+    header("Location: approval.php?status=denied");
+    exit;
+}
+
 // Update bonus time
 if (isset($_POST['update_bonus'])) {
     $entryId = mysqli_real_escape_string($conn, $_POST['entry_id']);
@@ -61,7 +74,7 @@ if (isset($_POST['update_bonus'])) {
     mysqli_query($conn, $updateBonusQuery);
 }
 
-// Fetch all submissions for admin to approve, with optional search and sorting
+// Fetch all pending submissions for admin to approve, with optional search and sorting
 $query = "
     SELECT w.*, s.sessionName, st.render_time 
     FROM tbl_weekly_time_entries w 
@@ -80,6 +93,14 @@ if (!empty($selectedCompany)) {
 }
 $query .= " ORDER BY w.course, w.comp_name"; // Sort by course and company name
 $result = mysqli_query($conn, $query);
+
+// Fetch approved submissions
+$approvedQuery = "SELECT * FROM tbl_weekly_time_entries WHERE status = 'submitted'";
+$approvedResult = mysqli_query($conn, $approvedQuery);
+
+// Fetch denied submissions
+$deniedQuery = "SELECT * FROM tbl_weekly_time_entries WHERE status = 'denied'";
+$deniedResult = mysqli_query($conn, $deniedQuery);
 
 // Fetch distinct courses for the dropdown
 $coursesQuery = "SELECT DISTINCT course FROM tbl_weekly_time_entries";
@@ -125,6 +146,8 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                         <h1 class="h3 mb-0 text-gray-800">Pending Submissions</h1>
                         <?php if (isset($_GET['status']) && $_GET['status'] == 'success'): ?>
                             <div class="alert alert-success">Submission approved successfully!</div>
+                        <?php elseif (isset($_GET['status']) && $_GET['status'] == 'denied'): ?>
+                            <div class="alert alert-danger">Submission denied successfully!</div>
                         <?php endif; ?>
                     </div>
 
@@ -161,6 +184,8 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                         </div>
                     </form>
                     <br>
+
+                    <!-- Table for Pending Submissions -->
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table" id="dataTableHover">
                             <thead>
@@ -183,7 +208,9 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                     <th>Bonus Time</th>
                                     <th>Remaining Time</th>
                                     <th>Render Time</th> <!-- New column for Render Time -->
-                                    <th>Actions</th>
+                                    <th>DTR Image Link</th> <!-- Updated column label -->
+                                    <th>Approve</th>
+                                    <th>Deny</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -221,13 +248,20 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <td><?php echo $row['remaining_time']; ?></td>
                                             <td><?php echo $row['render_time']; ?></td> <!-- Display Render Time -->
                                             <td>
+                                                <a href="<?php echo htmlspecialchars($row['image_link']); ?>" target="_blank" class="btn btn-info btn-sm">View Image</a> <!-- Button to view image link -->
+                                            </td>
+                                            <td>
                                                 <a href="?action=approve&Id=<?php echo $row['id']; ?>" class="btn btn-success">Approve</a>
+                                                
+                                            </td>
+                                            <td>
+                                            <a href="?action=deny&Id=<?php echo $row['id']; ?>" class="btn btn-danger">Deny</a> <!-- Deny button -->
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="18" class="text-center">No pending submissions.</td>
+                                        <td colspan="19" class="text-center">No pending submissions.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -235,6 +269,117 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                     </div>
                     <!---Container Fluid-->
                 </div>
+                                    <br><br><br><br><br><br>
+                <!-- Approved Submissions Table -->
+                <div class="container-fluid" id="container-wrapper">
+                    <h2 class="h4 mb-4">Approved Submissions</h2>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table" id="approvedTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Week Start Date</th>
+                                    <th>Student ID</th>
+                                    <th>Student Full Name</th>
+                                    <th>Course</th>
+                                    <th>Company</th>
+                                    <th>Session ID</th>
+                                    <th>Session Name</th>
+                                    <th>Total Hours</th>
+                                    <th>Remaining Time</th>
+                                    <th>DTR Image Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (mysqli_num_rows($approvedResult) > 0): ?>
+                                    <?php $sn = 1; while ($row = mysqli_fetch_assoc($approvedResult)): ?>
+                                        <tr>
+                                            <td><?php echo $sn++; ?></td>
+                                            <td><?php echo $row['week_start_date']; ?></td>
+                                            <td><?php echo $row['admissionNumber']; ?></td> 
+                                            <td><?php echo $row['student_fullname']; ?></td>
+                                            <td><?php echo $row['course']; ?></td>
+                                            <td><?php echo $row['comp_name']; ?></td>
+                                            <td><?php echo $row['sessionId']; ?></td>
+                                            <td><?php echo $row['sessionName']; ?></td>
+                                            <td>
+                                                <?php 
+                                                // Calculate total hours for display
+                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'];
+                                                echo $totalHours; 
+                                                ?>
+                                            </td>
+                                            <td><?php echo $row['remaining_time']; ?></td>
+                                            <td>
+                                                <a href="<?php echo htmlspecialchars($row['image_link']); ?>" target="_blank" class="btn btn-info btn-sm">View Image</a>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="11" class="text-center">No approved submissions.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br><br><br><br><br><br>
+                <!-- Denied Submissions Table -->
+                <div class="container-fluid" id="container-wrapper">
+                    <h2 class="h4 mb-4">Denied Submissions</h2>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table" id="deniedTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Week Start Date</th>
+                                    <th>Student ID</th>
+                                    <th>Student Full Name</th>
+                                    <th>Course</th>
+                                    <th>Company</th>
+                                    <th>Session ID</th>
+                                    <th>Session Name</th>
+                                    <th>Total Hours</th>
+                                    <th>Remaining Time</th>
+                                    <th>DTR Image Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (mysqli_num_rows($deniedResult) > 0): ?>
+                                    <?php $sn = 1; while ($row = mysqli_fetch_assoc($deniedResult)): ?>
+                                        <tr>
+                                            <td><?php echo $sn++; ?></td>
+                                            <td><?php echo $row['week_start_date']; ?></td>
+                                            <td><?php echo $row['admissionNumber']; ?></td> 
+                                            <td><?php echo $row['student_fullname']; ?></td>
+                                            <td><?php echo $row['course']; ?></td>
+                                            <td><?php echo $row['comp_name']; ?></td>
+                                            <td><?php echo $row['sessionId']; ?></td>
+                                            <td><?php echo $row['sessionName']; ?></td>
+                                            <td>
+                                                <?php 
+                                                // Calculate total hours for display
+                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'];
+                                                echo $totalHours; 
+                                                ?>
+                                            </td>
+                                            <td><?php echo $row['remaining_time']; ?></td>
+                                            <td>
+                                                <a href="<?php echo htmlspecialchars($row['image_link']); ?>" target="_blank" class="btn btn-info btn-sm">View Image</a>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="11" class="text-center">No denied submissions.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Footer -->
                 <?php include "Includes/footer.php"; ?>
                 <!-- Footer -->
@@ -264,6 +409,22 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                     "ordering": false, // Enable ordering
                     "info": true, // Show info about the table
                     "autoWidth": false // Disable auto width
+                });
+                $('#approvedTable').DataTable({
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": false,
+                    "ordering": false,
+                    "info": true,
+                    "autoWidth": false
+                });
+                $('#deniedTable').DataTable({
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": false,
+                    "ordering": false,
+                    "info": true,
+                    "autoWidth": false
                 });
             });
         </script>

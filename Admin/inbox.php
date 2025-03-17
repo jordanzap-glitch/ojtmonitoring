@@ -75,8 +75,9 @@ $query = "SELECT id, admissionNumber, fullname, course, report, reply, status, c
           FROM tblreports 
           ORDER BY CASE 
               WHEN status = 'pending' THEN 1 
-              WHEN status = 'resolved' THEN 2 
-              ELSE 3 
+              WHEN status = 'seen' THEN 2
+              WHEN status = 'resolved' THEN 3 
+              ELSE 4 
           END, created_at DESC"; // Adjust the query as needed
 $result = mysqli_query($conn, $query);
 
@@ -129,12 +130,19 @@ if (!$result) {
         .replied {
             color: blue; /* Color for replied status */
         }
+        .seen {
+            color: orange; /* Color for seen status */
+        }
         .delete-icon {
             position: absolute;
             top: 10px;
             right: 10px;
             color: red;
             cursor: pointer;
+        }
+        .eye-icon {
+            color: orange; /* Color for the eye icon */
+            margin-left: 5px;
         }
     </style>
 </head>
@@ -187,6 +195,10 @@ if (!$result) {
                                             // Check if the status is replied and display a check icon
                                             if ($row['status'] === 'replied') {
                                                 echo "<i class='fas fa-check-circle replied' title='Replied'></i>";
+                                            }
+                                            // Check if the status is seen and display an eye icon
+                                            if ($row['status'] === 'seen') {
+                                                echo "<i class='fas fa-eye eye-icon' title='Seen'></i>";
                                             }
                                             // Add delete icon
                                             echo "<i class='fas fa-trash delete-icon' title ='Delete' data-reportid='" . htmlspecialchars($row['id']) . "'></i>";
