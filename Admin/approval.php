@@ -283,16 +283,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                 <!-- Approved Submissions Table -->
                 <div class="container-fluid" id="container-wrapper">
                     <h2 class="h4 mb-4">Approved Submissions</h2>
-                    <form method="post" class="mb-3">
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <input type="text" name="search_approved" class="form-control" placeholder="Search Approved by Full Name" value="<?php echo htmlspecialchars($searchApprovedTerm); ?>">
-                            </div>
-                            <div class="col-md-4">
-                                <button class="btn btn-primary" type="submit" name="search_approved_btn">Search</button>
-                            </div>
-                        </div>
-                    </form>
+                   
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table" id="approvedTable">
                             <thead>
@@ -358,16 +349,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                 <!-- Denied Submissions Table -->
                 <div class="container-fluid" id="container-wrapper">
                     <h2 class="h4 mb-4">Denied Submissions</h2>
-                    <form method="post" class="mb-3">
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <input type="text" name="search_denied" class="form-control" placeholder="Search Denied by Full Name" value="<?php echo htmlspecialchars($searchDeniedTerm); ?>">
-                            </div>
-                            <div class="col-md-4">
-                                <button class="btn btn-primary" type="submit" name="search_denied_btn">Search</button>
-                            </div>
-                        </div>
-                    </form>
+                    
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table" id="deniedTable">
                             <thead>
