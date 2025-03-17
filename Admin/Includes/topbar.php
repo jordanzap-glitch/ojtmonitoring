@@ -65,8 +65,17 @@ $resultFetchReports = $conn->query($queryFetchReports);
                 <div class="dropdown-divider"></div>
                 <?php if ($resultFetchReports->num_rows > 0): ?>
                     <?php while ($report = $resultFetchReports->fetch_assoc()): ?>
+                        <?php
+                        // Set the maximum length for the report text
+                        $maxLength = 20; // Adjust this value as needed
+                        $reportText = htmlspecialchars($report['report']);
+                        // Shorten the report text if it exceeds the maximum length
+                        if (strlen($reportText) > $maxLength) {
+                            $reportText = substr($reportText, 0, $maxLength) . '...';
+                        }
+                        ?>
                         <a class="dropdown-item" href="inbox.php?reportId=<?php echo htmlspecialchars($report['admissionNumber']); ?>">
-                            <strong><?php echo htmlspecialchars($report['fullname']); ?></strong>: <?php echo htmlspecialchars($report['report']); ?>
+                            <strong><?php echo htmlspecialchars($report['fullname']); ?></strong>: <?php echo $reportText; ?>
                         </a>
                         <div class="dropdown-divider"></div>
                     <?php endwhile; ?>
