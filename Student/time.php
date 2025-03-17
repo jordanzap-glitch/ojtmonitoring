@@ -71,7 +71,7 @@ if (isset($_POST['submit_time'])) {
 
         // Allow submission if the last status is denied or if today is Friday to Sunday
         $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
-        if ($lastStatus === 'denied' || ($currentDay >= 1)) {
+        if ($lastStatus === 'denied' || ($currentDay >= 5)) {
             // Proceed with the rest of the code
             if (mysqli_num_rows($checkEntryResult) > 0 && $lastStatus !== 'denied') {
                 $statusMsg = "<div class='alert alert-danger'>You have already submitted your weekly time for this week.</div>";
