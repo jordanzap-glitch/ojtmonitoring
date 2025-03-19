@@ -1,9 +1,12 @@
 <?php
 // Start output buffering
 ob_start();
-include '../Includes/session.php';
+
 // Include database connection
 include '../Includes/dbcon.php';
+
+// Initialize status message variable
+$statusMsg = '';
 
 // Fetch students data from the database, including class name
 $query = "
@@ -20,14 +23,22 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     // Update the ot_active status
     if ($currentStatus == 'activate') {
         $updateQuery = "UPDATE tblstudents SET ot_isactive = 1 WHERE id = '$studentId'";
+        mysqli_query($conn, $updateQuery);
+        $statusMsg = "<div class='alert alert-success'>Student activated successfully!</div>";
     } else if ($currentStatus == 'deactivate') {
         $updateQuery = "UPDATE tblstudents SET ot_isactive = 0 WHERE id = '$studentId'";
+        mysqli_query($conn, $updateQuery);
+        $statusMsg = "<div class='alert alert-danger'>Student deactivated successfully!</div>";
     }
-    mysqli_query($conn, $updateQuery);
 
     // Redirect to the same page to avoid resubmission
-    header("Location: " . $_SERVER['PHP_SELF']);
+    header("Location: " . $_SERVER['PHP_SELF'] . "?statusMsg=" . urlencode($statusMsg));
     exit;
+}
+
+// Check if a status message is set in the URL
+if (isset($_GET['statusMsg'])) {
+    $statusMsg = $_GET['statusMsg'];
 }
 ?>
 
@@ -58,6 +69,16 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                         <h1 class="h3 mb-0 text-gray-800">Students List</h1>
                     </div>
 
+                    <!-- Display Status Message -->
+                    <?php if ($statusMsg): ?>
+                        <div class="alert alert-dismissible fade show" role="alert">
+                            <?php echo $statusMsg; ?>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Main Content -->
                     <div class="row">
                         <div class="col-lg-12">
@@ -69,7 +90,6 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                                                 <tr>
                                                     <th>Student ID</th>
                                                     <th>Full Name</th>
-                                                  
                                                     <th>Class Section</th> <!-- New column for Class Name -->
                                                     <th>Contact</th>
                                                     <th>Company Name</th>
@@ -85,7 +105,6 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                                                         <tr>
                                                             <td><?php echo htmlspecialchars($row['admissionNumber']); ?></td>
                                                             <td><?php echo htmlspecialchars($row['firstName'] . ' ' . $row['lastName']); ?></td>
-                                                          
                                                             <td><?php echo htmlspecialchars($row['className']); ?></td> <!-- Display Class Name -->
                                                             <td><?php echo htmlspecialchars($row['contact']); ?></td>
                                                             <td><?php echo htmlspecialchars($row['comp_name']); ?></td>
@@ -103,7 +122,7 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                                                     <?php endwhile; ?>
                                                 <?php else: ?>
                                                     <tr>
-                                                        <td colspan="10" class="text-center">No students found.</td>
+                                                        <td colspan="9" class="text-center">No students found.</td>
                                                     </tr>
                                                 <?php endif; ?>
                                             </tbody>
