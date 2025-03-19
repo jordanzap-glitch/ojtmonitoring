@@ -443,7 +443,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="remarksModalLabel">Remarks for Submission ID: <?php echo $row['id']; ?></h5>
+                                                        <h5 class="modal-title" id="remarksModalLabel">Remarks for Submission ID: <?php echo $row['admissionNumber']; ?></h5>
                                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
                                                         </button>
