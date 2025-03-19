@@ -65,6 +65,7 @@ if (isset($_POST['login'])) {
                 $_SESSION['lastName'] = $rows_student['lastName'];
                 $_SESSION['email'] = $rows_student['email'];
                 $_SESSION['classId'] = $rows_student['classId'];
+                $_SESSION['ot_isactive'] = $rows_student['ot_isactive'];
                 $_SESSION['user_type'] = 'Student';
                 // Set session user type
 

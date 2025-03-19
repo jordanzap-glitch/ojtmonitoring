@@ -1,6 +1,32 @@
 <?php
+// Start output buffering
+ob_start();
+error_reporting(0);
 include '../Includes/session.php';
+// Include database connection
 include '../Includes/dbcon.php';
+
+// Fetch students data from the database
+$query = "SELECT id, admissionNumber, firstName, lastName, classId, contact, comp_name, comp_link, email, address, ot_isactive FROM tblstudents";
+$result = mysqli_query($conn, $query);
+
+// Handle activation/deactivation
+if (isset($_GET['action']) && isset($_GET['id'])) {
+    $studentId = mysqli_real_escape_string($conn, $_GET['id']);
+    $currentStatus = mysqli_real_escape_string($conn, $_GET['action']);
+
+    // Update the ot_isactive status
+    if ($currentStatus == 'activate') {
+        $updateQuery = "UPDATE tblstudents SET ot_isactive = 1 WHERE id = '$studentId'";
+    } else if ($currentStatus == 'deactivate') {
+        $updateQuery = "UPDATE tblstudents SET ot_isactive = 0 WHERE id = '$studentId'";
+    }
+    mysqli_query($conn, $updateQuery);
+
+    // Redirect to the same page to avoid resubmission
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
 
 // Assuming you have validated the user and fetched their details
 // Store admission number in session
@@ -8,7 +34,7 @@ $admissionNumber = $_SESSION['admissionNumber'];
 if (isset($_SESSION['email'])) {
     // Fetch the admission number, full name, company name, and company link from the database
     $username = $_SESSION['email']; // Assuming username is stored in session
-    $query = "SELECT admissionNumber, firstName, lastName, comp_name, comp_link, classId FROM tblstudents WHERE email = '$username'";
+    $query = "SELECT admissionNumber, firstName, lastName, comp_name, comp_link, classId, ot_isactive FROM tblstudents WHERE email = '$username'";
     $result = mysqli_query($conn, $query);
     if ($result) {
         $row = mysqli_fetch_assoc($result);
@@ -23,6 +49,7 @@ if (isset($_SESSION['email'])) {
         $_SESSION['comp_link'] = $row['comp_link']; // Store company link in session
 
         $_SESSION['classId'] = $row['classId']; // Store classId in session
+        $_SESSION['ot_isactive'] = $row['ot_isactive']; // Store ot_isactive in session
     }
 }
 
@@ -50,6 +77,7 @@ if (isset($_POST['submit_time'])) {
     $comp_name = $_POST['comp_name'];
     $comp_link = $_POST['comp_link'];
     $image_link = $_POST['image_link']; // New link input
+    $overtime = floatval($_POST['overtime']); // New overtime input
 
     // Validate that the week start date is a Monday
     $date = new DateTime($weekStartDate);
@@ -71,7 +99,7 @@ if (isset($_POST['submit_time'])) {
 
         // Allow submission if the last status is denied or if today is Friday to Sunday
         $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
-        if ($lastStatus === 'denied' || ($currentDay >= 5)) {
+        if ($lastStatus === 'denied' || ($currentDay >= 3)) {
             // Proceed with the rest of the code
             if (mysqli_num_rows($checkEntryResult) > 0 && $lastStatus !== 'denied') {
                 $statusMsg = "<div class='alert alert-danger'>You have already submitted your weekly time for this week.</div>";
@@ -85,7 +113,7 @@ if (isset($_POST['submit_time'])) {
                 $saturdayTime = floatval($_POST['saturday_time']);
 
                 // Calculate total time submitted
-                $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime;
+                $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime + $overtime;
 
                 // Fetch the remaining time from the students table
                 $remainingTimeQuery = "SELECT remaining_time FROM tblstudents WHERE admissionNumber = '$admissionNumber'";
@@ -107,8 +135,8 @@ if (isset($_POST['submit_time'])) {
                 }
 
                 // Insert a new record with status 'pending'
-                $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, status, sessionId, total_hours, image_link) 
-                    VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', 'pending', '$activeSessionId', '$totalTimeSubmitted', '$image_link')");
+                $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, status, sessionId, total_hours, image_link, over_time) 
+                    VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', 'pending', '$activeSessionId', '$totalTimeSubmitted', '$image_link', '$overtime')");
 
                 if ($insertQuery) {
                     $_SESSION['submission_status'] = "success"; // Set session variable for success
@@ -160,6 +188,16 @@ if (isset($_POST['submit_time'])) {
 
         // Set the previous Monday on page load
         setPreviousMonday();
+
+        // Disable the overtime input by default
+        const overtimeInput = document.querySelector('input[name="overtime"]');
+        const otActiveValue = <?php echo isset($_SESSION['ot_isactive']) ? $_SESSION['ot_isactive'] : 0; ?>;
+
+        if (otActiveValue == 1) {
+            overtimeInput.disabled = false; // Enable if ot_isactive is 1
+        } else {
+            overtimeInput.disabled = true; // Disable if ot_isactive is not 1
+        }
     });
 </script>
 
@@ -227,6 +265,7 @@ if (isset($_POST['submit_time'])) {
                             <small class="form-text text-muted">Please select a Monday as the start date.</small>
                         </div>
                     </div>
+                    <p style="margin-top: 10px; color: red; font-style: italic;">Note: Each field can input only 8 hours.</p>
                     <div class="form-group row mb-3">
                         <div class="col-xl-6">
                             <label class="form-control-label">Monday Time (in hours)<span class="text-danger ml-2">*</span></label>
@@ -255,6 +294,14 @@ if (isset($_POST['submit_time'])) {
                         <div class="col-xl-6">
                             <label class="form-control-label">Saturday Time (in hours)<span class="text-danger ml-2"></span></label>
                             <input type="number" class="form-control" name="saturday_time" min="0" max="8" step="0.1" placeholder="Put Zero(0) if only Monday to Friday">
+                        </div>
+                    </div>
+                    <div class="form-group row mb-3">
+                        <div class="col-xl-6">
+                            <p style="margin-top: 10px; color: red; font-style: italic;">Note:This is only active when the student is approved to take overtime.</p>
+                            <p style="margin-top: 10px; color: red; font-style: italic;">(Ex. If you take 10 hours per day, get the 2 hours and input them into this textbox; please insert only overtime computed hours.)</p>
+                            <label class="form-control-label">Overtime (hours)<span class="text-danger ml-2">*</span></label>
+                            <input type="number" class="form-control" name="overtime" min="0" max="24" step="0.1" required>
                         </div>
                     </div>
                     <div class="form-group row mb-3">
@@ -296,6 +343,7 @@ if (isset($_POST['submit_time'])) {
                             <th>Thursday</th>
                             <th>Friday</th>
                             <th>Saturday</th>
+                            <th>Overtime</th> <!-- New column for Overtime -->
                             <th>Total Hours</th>
                             <th>Remaining Time</th> <!-- New column for Remaining Time -->
                             <th>Status</th> <!-- New column for Status -->
@@ -312,7 +360,7 @@ if (isset($_POST['submit_time'])) {
                           if ($num > 0) {
                               while ($rows = $rs->fetch_assoc()) {
                                   $sn++;
-                                  $totalHours = $rows['monday_time'] + $rows['tuesday_time'] + $rows['wednesday_time'] + $rows['thursday_time'] + $rows['friday_time'] + $rows['saturday_time'];
+                                  $totalHours = $rows['monday_time'] + $rows['tuesday_time'] + $rows['wednesday_time'] + $rows['thursday_time'] + $rows['friday_time'] + $rows['saturday_time'] + $rows['over_time']; // Include overtime in total hours
                                   echo "
                                   <tr>
                                       <td>".$sn."</td>
@@ -328,7 +376,8 @@ if (isset($_POST['submit_time'])) {
                                       <td>" . $rows['thursday_time'] . "</td>
                                       <td>" . $rows['friday_time'] . "</td>
                                       <td>" . $rows['saturday_time'] . "</td>
-                                      <td>" . $rows['total_hours'] . "</td> <!-- Display Total Hours -->
+                                      <td>" . $rows['over_time'] . "</td> <!-- Display Overtime -->
+                                      <td>" . $totalHours . "</td> <!-- Display Total Hours -->
                                       <td>" . $rows['remaining_time'] . "</td> <!-- Display Remaining Time -->
                                       <td>" . $rows['status'] . "</td> <!-- Display Status -->
                                   </tr>";
@@ -383,3 +432,8 @@ if (isset($_POST['submit_time'])) {
   </script>
 </body>
 </html>
+
+<?php
+// End output buffering and flush output
+ob_end_flush();
+?>

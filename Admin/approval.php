@@ -35,8 +35,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'approve' && isset($_GET['Id'])
         // Calculate total hours submitted
         $totalHours = $entry['monday_time'] + $entry['tuesday_time'] + $entry['wednesday_time'] + $entry['thursday_time'] + $entry['friday_time'] + $entry['saturday_time'];
         
-        // Include bonus time in total hours
-        $totalHours += $entry['bon_time'];
+        // Include bonus time and overtime in total hours
+        $totalHours += $entry['bon_time'] + $entry['over_time'];
 
         // Update the remaining_time in tblstudents
         $admissionNumber = $entry['admissionNumber'];
@@ -163,7 +163,6 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
 
                     <!-- Search and Sort Form -->
                     <form method="post" class="mb-3">
-                        <div ```php
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <input type="text" name="search_term" class="form-control" placeholder="Search by Student Full Name" value="<?php echo htmlspecialchars($searchTerm); ?>">
@@ -217,6 +216,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                     <th>Saturday</th>
                                     <th>Total Hours</th>
                                     <th>Bonus Time</th>
+                                    <th>Overtime</th> <!-- New column for Overtime -->
                                     <th>Remaining Time</th>
                                     <th>Render Time</th>
                                     <th>Date Submitted</th> <!-- New column for Date Created -->
@@ -246,7 +246,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <td>
                                                 <?php 
                                                 // Calculate total hours for display
-                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'];
+                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'] + $row['over_time'];
                                                 echo $totalHours; 
                                                 ?>
                                             </td>
@@ -257,6 +257,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                                     <button type="submit" name="update_bonus" class="btn btn-warning btn-sm">Update</button>
                                                 </form>
                                             </td>
+                                            <td><?php echo $row['over_time']; ?></td> <!-- Display Overtime -->
                                             <td><?php echo $row['remaining_time']; ?></td>
                                             <td><?php echo $row['render_time']; ?></td>
                                             <td><?php echo $row['date_created']; ?></td> <!-- Display Date Created -->
@@ -327,7 +328,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <td>
                                                 <?php 
                                                 // Calculate total hours for display
-                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'];
+                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'] + $row['over_time'];
                                                 echo $totalHours; 
                                                 ?>
                                             </td>
@@ -393,7 +394,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <td>
                                                 <?php 
                                                 // Calculate total hours for display
-                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'];
+                                                $totalHours = $row['monday_time'] + $row['tuesday_time'] + $row['wednesday_time'] + $row['thursday_time'] + $row['friday_time'] + $row['saturday_time'] + $row['bon_time'] + $row['over_time'];
                                                 echo $totalHours; 
                                                 ?>
                                             </td>
