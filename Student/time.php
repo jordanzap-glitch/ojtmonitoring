@@ -77,7 +77,7 @@ if (isset($_POST['submit_time'])) {
     $comp_name = $_POST['comp_name'];
     $comp_link = $_POST['comp_link'];
     $image_link = $_POST['image_link']; // New link input
-    $overtime = floatval($_POST['overtime']); // New overtime input
+    // New overtime input
 
     // Validate that the week start date is a Monday
     $date = new DateTime($weekStartDate);
@@ -111,6 +111,7 @@ if (isset($_POST['submit_time'])) {
                 $thursdayTime = floatval($_POST['thursday_time']);
                 $fridayTime = floatval($_POST['friday_time']);
                 $saturdayTime = floatval($_POST['saturday_time']);
+                $overtime = floatval($_POST['overtime']); 
 
                 // Calculate total time submitted
                 $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime + $overtime;
