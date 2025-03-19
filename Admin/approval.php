@@ -12,6 +12,14 @@ $selectedCompany = '';
 $searchApprovedTerm = '';
 $searchDeniedTerm = '';
 
+// Function to update remarks
+function updateRemarks($conn, $entryId, $remarks) {
+    $entryId = mysqli_real_escape_string($conn, $entryId);
+    $remarks = mysqli_real_escape_string($conn, $remarks);
+    $updateRemarksQuery = "UPDATE tbl_weekly_time_entries SET remarks = '$remarks' WHERE id = '$entryId'";
+    return mysqli_query($conn, $updateRemarksQuery);
+}
+
 // Check if a search term has been submitted for pending submissions
 if (isset($_POST['search'])) {
     $searchTerm = mysqli_real_escape_string($conn, $_POST['search_term']);
@@ -76,6 +84,17 @@ if (isset($_POST['update_bonus'])) {
 
     $updateBonusQuery = "UPDATE tbl_weekly_time_entries SET bon_time = '$bonusTime' WHERE id = '$entryId'";
     mysqli_query($conn, $updateBonusQuery);
+}
+
+// Update remarks
+if (isset($_POST['update_remarks'])) {
+    $entryId = $_POST['entry_id'];
+    $remarks = $_POST['remarks'];
+
+    if (updateRemarks($conn, $entryId, $remarks)) {
+        header("Location: approval.php?status=remarks_updated");
+        exit;
+    }
 }
 
 // Fetch all pending submissions for admin to approve, with optional search and sorting
@@ -160,6 +179,8 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                             <div class="alert alert-success">Submission approved successfully!</div>
                         <?php elseif (isset($_GET['status']) && $_GET['status'] == 'denied'): ?>
                             <div class="alert alert-danger">Submission denied successfully!</div>
+                        <?php elseif (isset($_GET['status']) && $_GET['status'] == 'remarks_updated'): ?>
+                            <div class="alert alert-success">Remarks updated successfully!</div>
                         <?php endif; ?>
                     </div>
 
@@ -399,6 +420,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                     <th>Remaining Time</th>
                                     <th>DTR Image Link</th>
                                     <th>Remarks</th>
+                                    <th>Edit Remarks</th> <!-- New column for Edit Remarks -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -436,6 +458,9 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <td>
                                                 <button class="btn btn-warning" data-toggle="modal" data-target="#remarksModal<?php echo $row['id']; ?>">View Remarks</button>
                                             </td>
+                                            <td>
+                                                <button class="btn btn-primary" data-toggle="modal" data-target="#editRemarksModal<?php echo $row['id']; ?>">Edit Remarks</button>
+                                            </td>
                                         </tr>
 
                                         <!-- Remarks Modal -->
@@ -458,10 +483,37 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             </div>
                                         </div>
 
+                                        <!-- Edit Remarks Modal -->
+                                        <div class="modal fade" id="editRemarksModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="editRemarksModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editRemarksModalLabel">Edit Remarks for Student ID: <?php echo $row['admissionNumber']; ?></h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <form method="post" action="">
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="entry_id" value="<?php echo $row['id']; ?>">
+                                                            <div class="form-group">
+                                                                <label for="remarks">Remarks:</label>
+                                                                <textarea class="form-control" name="remarks" id="remarks" required><?php echo htmlspecialchars($row['remarks']); ?></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            <button type="submit" name="update_remarks" class="btn btn-primary">Update Remarks</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="11" class="text-center">No denied submissions.</td>
+                                        <td colspan="12" class="text-center">No denied submissions.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
