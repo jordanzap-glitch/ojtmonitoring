@@ -1,7 +1,8 @@
-<?php 
+<?php
+// Start output buffering
 ob_start();
-error_reporting(0);
 include '../Includes/session.php';
+// Include database connection
 include '../Includes/dbcon.php';
 
 // Initialize search variables
@@ -55,11 +56,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'approve' && isset($_GET['Id'])
 }
 
 // Deny submission
-if (isset($_GET['action']) && $_GET['action'] == 'deny' && isset($_GET['Id'])) {
-    $entryId = $_GET['Id'];
+if (isset($_POST['deny_submission'])) {
+    $entryId = mysqli_real_escape_string($conn, $_POST['entry_id']);
+    $remarks = mysqli_real_escape_string($conn, $_POST['remarks']);
 
-    // Update the status to 'denied'
-    $updateEntryQuery = "UPDATE tbl_weekly_time_entries SET status = 'denied' WHERE id = '$entryId'";
+    // Update the status to 'denied' and add remarks
+    $updateEntryQuery = "UPDATE tbl_weekly_time_entries SET status = 'denied', remarks = '$remarks' WHERE id = '$entryId'";
     mysqli_query($conn, $updateEntryQuery);
 
     // Redirect or show success message
@@ -268,9 +270,37 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                                 <a href="?action=approve&Id=<?php echo $row['id']; ?>" class="btn btn-success">Approve</a>
                                             </td>
                                             <td>
-                                                <a href="?action=deny&Id=<?php echo $row['id']; ?>" class="btn btn-danger">Deny</a>
+                                                <button class="btn btn-danger" data-toggle="modal" data-target="#denyModal<?php echo $row['id']; ?>">Deny</button>
                                             </td>
                                         </tr>
+
+                                        <!-- Deny Modal -->
+                                        <div class="modal fade" id="denyModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="denyModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="denyModalLabel">Deny Submission</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <form method="post" action="">
+                                                        <div class="modal-body">
+                                                            <input type="hidden" name="entry_id" value="<?php echo $row['id']; ?>">
+                                                            <div class="form-group">
+                                                                <label for="remarks">Remarks:</label>
+                                                                <textarea class="form-control" name="remarks" id="remarks" required></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            <button type="submit" name="deny_submission" class="btn btn-danger">Deny</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
@@ -368,6 +398,7 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                     <th>Total Hours</th>
                                     <th>Remaining Time</th>
                                     <th>DTR Image Link</th>
+                                    <th>Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -402,7 +433,31 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
                                             <td>
                                                 <a href="<?php echo htmlspecialchars($row['image_link']); ?>" target="_blank" class="btn btn-info btn-sm">View Image</a>
                                             </td>
+                                            <td>
+                                                <button class="btn btn-warning" data-toggle="modal" data-target="#remarksModal<?php echo $row['id']; ?>">View Remarks</button>
+                                            </td>
                                         </tr>
+
+                                        <!-- Remarks Modal -->
+                                        <div class="modal fade" id="remarksModal<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="remarksModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="remarksModalLabel">Remarks for Submission ID: <?php echo $row['id']; ?></h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p><?php echo nl2br(htmlspecialchars($row['remarks'])); ?></p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
@@ -464,6 +519,8 @@ while ($row = mysqli_fetch_assoc($companiesResult)) {
         </script>
     </body>
 </html>
+
 <?php
+// End output buffering and flush output
 ob_end_flush();
 ?>

@@ -1,7 +1,7 @@
 <?php
 // Start output buffering
 ob_start();
-
+include '../Includes/session.php';
 // Include database connection
 include '../Includes/dbcon.php';
 
@@ -70,14 +70,7 @@ if (isset($_GET['statusMsg'])) {
                     </div>
 
                     <!-- Display Status Message -->
-                    <?php if ($statusMsg): ?>
-                        <div class="alert alert-dismissible fade show" role="alert">
-                            <?php echo $statusMsg; ?>
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    <?php endif; ?>
+                    
 
                     <!-- Main Content -->
                     <div class="row">
@@ -86,6 +79,14 @@ if (isset($_GET['statusMsg'])) {
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table table-bordered" id="studentsTable">
+                                        <?php if ($statusMsg): ?>
+                                            <div class="alert alert-dismissible fade show" role="alert">
+                                                <?php echo $statusMsg; ?>
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                        <?php endif; ?>
                                             <thead>
                                                 <tr>
                                                     <th>Student ID</th>

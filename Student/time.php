@@ -1,9 +1,8 @@
-<?php
+<?php 
 // Start output buffering
 ob_start();
 error_reporting(0);
 include '../Includes/session.php';
-// Include database connection
 include '../Includes/dbcon.php';
 
 // Fetch students data from the database
@@ -77,7 +76,7 @@ if (isset($_POST['submit_time'])) {
     $comp_name = $_POST['comp_name'];
     $comp_link = $_POST['comp_link'];
     $image_link = $_POST['image_link']; // New link input
-    // New overtime input
+    $overtime = floatval($_POST['overtime']); // New overtime input
 
     // Validate that the week start date is a Monday
     $date = new DateTime($weekStartDate);
@@ -89,7 +88,8 @@ if (isset($_POST['submit_time'])) {
         $checkEntryResult = mysqli_query($conn, $checkEntryQuery);
 
         // Check the status of the last submission
-        $lastSubmissionQuery = "SELECT status FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber' ORDER BY date_created DESC LIMIT 1";
+        $lastSubmissionQuery = "SELECT status FROM tbl_week ```php
+ly_time_entries WHERE admissionNumber = '$admissionNumber' ORDER BY date_created DESC LIMIT 1";
         $lastSubmissionResult = mysqli_query($conn, $lastSubmissionQuery);
         $lastStatus = null;
 
@@ -99,7 +99,7 @@ if (isset($_POST['submit_time'])) {
 
         // Allow submission if the last status is denied or if today is Friday to Sunday
         $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
-        if ($lastStatus === 'denied' || ($currentDay >= 5)) {
+        if ($lastStatus === 'denied' || ($currentDay >= 3)) {
             // Proceed with the rest of the code
             if (mysqli_num_rows($checkEntryResult) > 0 && $lastStatus !== 'denied') {
                 $statusMsg = "<div class='alert alert-danger'>You have already submitted your weekly time for this week.</div>";
@@ -111,7 +111,6 @@ if (isset($_POST['submit_time'])) {
                 $thursdayTime = floatval($_POST['thursday_time']);
                 $fridayTime = floatval($_POST['friday_time']);
                 $saturdayTime = floatval($_POST['saturday_time']);
-                $overtime = floatval($_POST['overtime']); 
 
                 // Calculate total time submitted
                 $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime + $overtime;
@@ -169,7 +168,7 @@ if (isset($_POST['submit_time'])) {
   <link href="img/logo/attnlg.jpg" rel="icon">
   <?php include 'Includes/title.php'; ?>
   <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+  <link href ="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
   <link href="css/ruang-admin.min.css" rel="stylesheet">
   <link href="../vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet"> <!-- DataTables CSS -->
 
@@ -257,7 +256,7 @@ if (isset($_POST['submit_time'])) {
                     </div>
                     <div class="form-group row mb-3">
                     <div class="col-xl-6">
-                        <label class="form-control-label">Company Link (Optional)<span class="text-danger ml-2">*</span></label>
+                        <label class ="form-control-label">Company Link (Optional)<span class="text-danger ml-2">*</span></label>
                         <input type="text" class="form-control" name="comp_link" id="comp_link" value="<?php echo isset($_SESSION['comp_link']) ? $_SESSION['comp_link'] : ''; ?>" readonly>
                     </div>
                         <div class="col-xl-6">
@@ -299,7 +298,7 @@ if (isset($_POST['submit_time'])) {
                     </div>
                     <div class="form-group row mb-3">
                         <div class="col-xl-6">
-                            <p style="margin-top: 10px; color: red; font-style: italic;">Note:This is only active when the student is approved to take overtime.</p>
+                            <p style="margin-top: 10px; color: red; font-style: italic;">Note: This is only active when the student is approved to take overtime (Message the admin to Activate).</p>
                             <p style="margin-top: 10px; color: red; font-style: italic;">(Ex. If you take 10 hours per day, get the 2 hours and input them into this textbox; please insert only overtime computed hours.)</p>
                             <label class="form-control-label">Overtime (hours)<span class="text-danger ml-2">*</span></label>
                             <input type="number" class="form-control" name="overtime" min="0" max="24" step="0.1" required>
@@ -321,7 +320,7 @@ if (isset($_POST['submit_time'])) {
                 <div class="col-lg-12">
                   <div class="card mb-4">
                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                      <h6 class="m-0 font-weight-bold text-primary">Submitted Weekly Time(History)</h6>
+                      <h6 class="m-0 font-weight-bold text-primary">Submitted Weekly Time (History)</h6>
                       <button class="btn btn-success" onclick="location.reload();">Refresh</button>
                     </div>
                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="text-align: left;">
@@ -337,17 +336,18 @@ if (isset($_POST['submit_time'])) {
                             <th>Course</th>
                             <th>Company</th>
                             <th>Company Link</th>
-                            <th>Link</th> <!-- New column for Link -->
+                            <th>Link</th>
                             <th>Monday</th>
                             <th>Tuesday</th>
                             <th>Wednesday</th>
                             <th>Thursday</th>
                             <th>Friday</th>
                             <th>Saturday</th>
-                            <th>Overtime</th> <!-- New column for Overtime -->
+                            <th>Overtime</th>
                             <th>Total Hours</th>
-                            <th>Remaining Time</th> <!-- New column for Remaining Time -->
-                            <th>Status</th> <!-- New column for Status -->
+                            <th>Remaining Time</th>
+                            <th>Remarks</th>
+                            <th>Status</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -361,7 +361,7 @@ if (isset($_POST['submit_time'])) {
                           if ($num > 0) {
                               while ($rows = $rs->fetch_assoc()) {
                                   $sn++;
-                                  $totalHours = $rows['monday_time'] + $rows['tuesday_time'] + $rows['wednesday_time'] + $rows['thursday_time'] + $rows['friday_time'] + $rows['saturday_time'] + $rows['over_time']; // Include overtime in total hours
+                                  $totalHours = $rows['monday_time'] + $rows['tuesday_time'] + $rows['wednesday_time'] + $rows['thursday_time'] + $rows['friday_time'] + $rows['saturday_time'] + $rows['over_time'];
                                   echo "
                                   <tr>
                                       <td>".$sn."</td>
@@ -370,21 +370,22 @@ if (isset($_POST['submit_time'])) {
                                       <td>" . $rows['course'] . "</td>
                                       <td>" . $rows['comp_name'] . "</td>
                                       <td>" . $rows['comp_link'] . "</td>
-                                      <td><a href='" . $rows['image_link'] . "' target='_blank'>" . $rows['image_link'] . "</a></td> <!-- Display Link -->
+                                      <td><a href='" . $rows['image_link'] . "' target='_blank'>" . $rows['image_link'] . "</a></td>
                                       <td>" . $rows['monday_time'] . "</td>
                                       <td>" . $rows['tuesday_time'] . "</td>
                                       <td>" . $rows['wednesday_time'] . "</td>
                                       <td>" . $rows['thursday_time'] . "</td>
                                       <td>" . $rows['friday_time'] . "</td>
                                       <td>" . $rows['saturday_time'] . "</td>
-                                      <td>" . $rows['over_time'] . "</td> <!-- Display Overtime -->
-                                      <td>" . $totalHours . "</td> <!-- Display Total Hours -->
-                                      <td>" . $rows['remaining_time'] . "</td> <!-- Display Remaining Time -->
-                                      <td>" . $rows['status'] . "</td> <!-- Display Status -->
+                                      <td>" . $rows['over_time'] . "</td>
+                                      <td>" . $totalHours . "</td>
+                                      <td>" . $rows['remaining_time'] . "</td>
+                                      <td><button class='btn btn-info remarks' data-remarks='" . htmlspecialchars($rows['remarks']) . "'>View Remarks</button></td>
+                                      <td>" . $rows['status'] . "</td>
                                   </tr>";
                               }
                           } else {
-                              echo "<tr><td colspan='15' class='text-center'>No Record Found!</td></tr>";
+                              echo "<tr><td colspan='17' class='text-center'>No Record Found!</td></tr>";
                           }
                           ?>
                         </tbody>
@@ -410,6 +411,26 @@ if (isset($_POST['submit_time'])) {
     <i class="fas fa-angle-up"></i>
   </a>
 
+  <!-- Modal for Remarks -->
+  <div class="modal fade" id="remarksModal" tabindex="-1" role="dialog" aria-labelledby="remarksModalLabel" aria-hidden="true">
+      <div class="modal-dialog " role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="remarksModalLabel">Remarks</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                  <p id="remarksContent"></p>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
   <script src="../vendor/jquery/jquery.min.js"></script>
   <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
@@ -427,7 +448,14 @@ if (isset($_POST['submit_time'])) {
         "searching": true, // Enable searching
         "ordering": false, // Enable sorting
         "info": true, // Show info about the table
-        "autoWidth": true // Disable auto width
+        "autoWidth": false // Disable auto width
+      });
+
+      // Show remarks in modal
+      $('.remarks').on('click', function() {
+          var remarks = $(this).data('remarks');
+          $('#remarksContent').text(remarks);
+          $('#remarksModal').modal('show');
       });
     });
   </script>
