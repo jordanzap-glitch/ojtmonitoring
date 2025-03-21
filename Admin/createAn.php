@@ -46,7 +46,7 @@ if (isset($_POST['submit'])) {
         // If everything is ok, try to upload file
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
             // Insert the announcement into the database
-            $query = "INSERT INTO tblannouncement (admin_id, adminName, content, date_created, image_path) VALUES ('$admin_id', '$name', '$content', '$date_created', '" . basename($_FILES["image"]["name"]) . "')";
+            $query = "INSERT INTO tblannouncement (admin_id, adminName, content, date_created, image_path, is_active) VALUES ('$admin_id', '$name', '$content', '$date_created', '" . basename($_FILES["image"]["name"]) . "', 1)";
             if (mysqli_query($conn, $query)) {
                 $statusMsg = "<div class='alert alert-success'>Announcement created successfully!</div>";
             } else {
@@ -56,6 +56,29 @@ if (isset($_POST['submit'])) {
             $statusMsg .= "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
         }
     }
+}
+
+// Fetch announcements for the logged-in admin
+$admin_id = $_SESSION['userId'];
+$announcementQuery = "SELECT * FROM tblannouncement WHERE admin_id = '$admin_id' ORDER BY date_created DESC";
+$announcementResult = $conn->query($announcementQuery);
+
+// Handle activation/deactivation
+if (isset($_GET['action']) && isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $action = $_GET['action'];
+
+    if ($action == 'activate') {
+        $updateQuery = "UPDATE tblannouncement SET is_active = 1 WHERE id = '$id'";
+        mysqli_query($conn, $updateQuery);
+    } elseif ($action == 'deactivate') {
+        $updateQuery = "UPDATE tblannouncement SET is_active = 0 WHERE id = '$id'";
+        mysqli_query($conn, $updateQuery);
+    }
+
+    // Redirect to avoid resubmission
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 ?>
 
@@ -116,6 +139,69 @@ if (isset($_POST['submit'])) {
                                         </div>
                                         <button type="submit" name="submit" class="btn btn-primary">Create Announcement</button>
                                     </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Row-->
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card mb-4">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Your Announcements</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                   
+                                                    <th>Admin ID</th>
+                                                    <th>Admin Name</th>
+                                                    <th>Content</th>
+                                                    <th>Image</th>
+                                                    <th>Date Created</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php if ($announcementResult->num_rows > 0): ?>
+                                                    <?php while ($row = $announcementResult->fetch_assoc()): ?>
+                                                        <tr>
+                                                           
+                                                            <td><?php echo htmlspecialchars($row['admin_id']); ?></td>
+                                                            <td><?php echo htmlspecialchars($row['adminName']); ?></td>
+                                                            <td><?php echo htmlspecialchars($row['content']); ?></td>
+                                                            <td>
+                                                                <?php if (!empty($row['image_path'])): ?>
+                                                                    <img src="../Student/uploads/<?php echo htmlspecialchars($row['image_path']); ?>" alt="Announcement Image" style="width: 100px; height: auto;">
+                                                                <?php else: ?>
+                                                                    No Image
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td><?php echo date('F j, Y, g:i a', strtotime($row['date_created'])); ?></td>
+                                                            <td>
+                                                                <?php echo $row['is_active'] ? 'Active' : 'Inactive'; ?>
+                                                            </td>
+                                                            <td>
+                                                                <?php if ($row['is_active']): ?>
+                                                                    <a href="?action=deactivate&id=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm">Deactivate</a>
+                                                                <?php else: ?>
+                                                                    <a href="?action=activate&id=<?php echo $row['id']; ?>" class="btn btn-success btn-sm">Activate</a>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endwhile; ?>
+                                                <?php else: ?>
+                                                    <tr>
+                                                        <td colspan="8" class="text-center">No announcements found.</td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>

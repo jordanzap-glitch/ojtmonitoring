@@ -17,8 +17,8 @@ $rrw = $rs->fetch_assoc();
 
 $remainingTime = $rrw['remaining_time']; // Get remaining time from the fetched data
 
-// Fetch the latest announcement including image_path
-$announcementQuery = "SELECT adminName, content, date_created, image_path FROM tblannouncement ORDER BY date_created DESC LIMIT 1"; // Fetch the latest announcement
+// Fetch the latest active announcement including image_path
+$announcementQuery = "SELECT adminName, content, date_created, image_path FROM tblannouncement WHERE is_active = 1 ORDER BY date_created DESC LIMIT 1"; // Fetch the latest active announcement
 $announcementResult = $conn->query($announcementQuery);
 ?>
 
