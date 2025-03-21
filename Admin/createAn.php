@@ -1,4 +1,5 @@
 <?php
+ob_start();
 error_reporting(0);
 include '../Includes/session.php';
 include '../Includes/dbcon.php';
@@ -228,3 +229,6 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 </body>
 
 </html>
+<?php
+ob_end_flush();
+?>
