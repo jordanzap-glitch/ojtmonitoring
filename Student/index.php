@@ -86,7 +86,38 @@ $announcementResult = $conn->query($announcementQuery);
 .shake {
   animation: shake 0.5s ease-in-out infinite;
 }
+/* Fixed position for speed dial button */
+    .fixed-speed-dial {
+      position: fixed;
+      right: 20px; /* Distance from the right */
+      bottom: 20px; /* Distance from the bottom */
+      z-index: 10; /* Ensure it stays above other elements */
+    }
   </style>
+
+
+
+
+<script>
+  // Toggle speed dial menu visibility and rotate button
+  $('#speed-dial-button').on('click', function(event) {
+    event.stopPropagation(); // Prevent event from bubbling up
+    $('#speed-dial-menu-dropdown').toggleClass('hidden');
+    $(this).find('svg').toggleClass('rotate'); // Rotate the button
+  });
+
+  // Prevent speed dial from toggling when clicking on the Change Password link
+  $('#change-password-link').on('click', function(event) {
+    $('#speed-dial-menu-dropdown').addClass('hidden'); // Hide the menu
+  });
+
+  // Close the speed dial menu if clicking outside of it
+  $(document).on('click', function(event) {
+    if (!$(event.target).closest('.speeddial-button').length) {
+      $('#speed-dial-menu-dropdown').addClass('hidden'); // Hide the menu
+    }
+  });
+</script>
 </head>
 
 <body id="page-top" class="bg-gray-100">
@@ -157,7 +188,7 @@ $announcementResult = $conn->query($announcementQuery);
       </div>
     </div>
   </div>
-  <div class="w-full relative min-h-[380px]">
+  <div class="w-full relative min-h-[380px] fixed-speed-dial">
     <div class="absolute right-6 bottom-6 group z-50 speeddial-button">
       <div id="speed-dial-menu-dropdown" class="speed-dial-menu flex flex-col hidden items-center mb-4 space-y-2 bg-white shadow-[0px_15px_60px_-4px_rgba(16,24,40,0.10)] rounded-xl border border-gray-200">
         <ul class="text-sm text-gray-600 p-5">
