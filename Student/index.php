@@ -57,6 +57,12 @@ $announcementResult = $conn->query($announcementQuery);
       font-size: 1.2rem; /* Increase font size for content */
       line-height: 1.5; /* Improve readability */
     }
+    /* Center the image in the modal */
+    .modal-body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   </style>
 </head>
 
