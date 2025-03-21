@@ -116,7 +116,7 @@
         </a>
         <div id="collapseBootstrapcon" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class=" collapse-header">Contribution</h6>
+                <h6 class="collapse-header">Contribution</h6>
                 <a class="collapse-item" href="createSessionTerm.php">Create Session and Term</a>
             </div>
         </div>
@@ -124,13 +124,21 @@
 
     <hr class="sidebar-divider">
     <div class="sidebar-heading">
-        Messages
+        Messages/Announcement
     </div>
     <li class="nav-item">
-        <a class="nav-link" href="inbox.php">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMessages"
+           aria-expanded="true" aria-controls="collapseMessages">
             <i class="fas fa-inbox"></i>
-            <span>Inbox</span>
+            <span>Messages/Announcement</span>
         </a>
+        <div id="collapseMessages" class="collapse" aria-labelledby="headingMessages" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Message Actions</h6>
+                <a class="collapse-item" href="inbox.php">Inbox</a>
+                <a class="collapse-item" href="createannoun.php">Create Announcement</a>
+            </div>
+        </div>
     </li>
 
     <hr class="sidebar-divider">
