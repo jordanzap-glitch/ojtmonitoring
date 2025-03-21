@@ -101,7 +101,7 @@ $announcementResult = $conn->query($announcementQuery);
                     <?php if ($announcementResult->num_rows > 0): ?>
                       <?php $announcement = $announcementResult->fetch_assoc(); ?>
                       <li class="list-group-item">
-                        <p><strong class="mb-1">Published by: <?php echo htmlspecialchars($announcement['adminName']); ?></strong></p>
+                        <p class="mb-1"> Published by: <strong><?php echo htmlspecialchars($announcement['adminName']); ?></strong></p>
                         <strong><?php echo htmlspecialchars($announcement['content']); ?></strong>
                         <br><br><br><br><br>
                         <?php if (!empty($announcement['image_path'])): ?>
