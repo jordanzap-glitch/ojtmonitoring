@@ -60,6 +60,10 @@ if (isset($_POST['submit'])) {
     // Insert the announcement into the database
     $query = "INSERT INTO tblannouncement (admin_id, adminName, content, date_created, image_path, is_active) VALUES ('$admin_id', '$name', '$content', '$date_created', '$imagePath', 1)";
     if (mysqli_query($conn, $query)) {
+        // Deactivate all other announcements
+        $updateQuery = "UPDATE tblannouncement SET is_active = 0 WHERE admin_id = '$admin_id' AND id != LAST_INSERT_ID()";
+        mysqli_query($conn, $updateQuery);
+        
         $statusMsg = "<div class='alert alert-success'>Announcement created successfully!</div>";
     } else {
         $statusMsg = "<div class='alert alert-danger'>Error: " . mysqli_error($conn) . "</div>";
@@ -77,6 +81,11 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     $action = $_GET['action'];
 
     if ($action == 'activate') {
+        // Deactivate all other announcements
+        $updateQuery = "UPDATE tblannouncement SET is_active = 0 WHERE admin_id = '$admin_id'";
+        mysqli_query($conn, $updateQuery);
+
+        // Activate the selected announcement
         $updateQuery = "UPDATE tblannouncement SET is_active = 1 WHERE id = '$id'";
         mysqli_query($conn, $updateQuery);
     } elseif ($action == 'deactivate') {
