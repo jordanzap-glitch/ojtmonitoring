@@ -129,7 +129,7 @@ $announcementResult = $conn->query($announcementQuery);
   <div class="bg-white shadow-lg rounded-lg p-6 announcement-card relative">
     <div class="flex justify-between items-center">
       <h6 class="announcement-header text-xl font-bold text-blue-600 text-center w-full">Latest Announcement</h6>
-      <i class="fas fa-bell text-blue-600 text-2xl"></i> <!-- Bell icon added -->
+      <i class="fas fa-bell text-blue-600 text-2xl shake"></i> <!-- Bell icon with shake animation -->
     </div>
     <div class="mt-4">
       <ul class="list-none">
