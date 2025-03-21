@@ -155,7 +155,7 @@ $announcementResult = $conn->query($announcementQuery);
     </div>
   </div>
 </div>
-
+<br><br>
 <div class="mb-4">
   <div class="bg-white shadow-lg rounded-lg p-6 announcement-card relative">
     <div class="flex justify-between items-center">
