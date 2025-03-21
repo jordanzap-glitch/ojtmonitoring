@@ -134,8 +134,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                                             <textarea class="form-control" name="content" id="content" rows="5" required placeholder="Enter announcement content"></textarea>
                                         </div>
                                         <div class="form-group">
-                                            <label for="image">Upload Image<span class="text-danger ml-2"></span></label>
-                                            <input type="file" class="form-control" name="image" id="image">
+                                            <label for="image">Upload Image<span class="text-danger ml-2">*</span></label>
+                                            <input type="file" class="form-control" name="image" id="image" required>
                                             <small class="form-text text-muted">Max size: 2MB. Allowed formats: JPG, JPEG, PNG, GIF.</small>
                                         </div>
                                         <button type="submit" name="submit" class="btn btn-primary">Create Announcement</button>
