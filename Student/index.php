@@ -46,6 +46,17 @@ $announcementResult = $conn->query($announcementQuery);
     #modalImage:hover {
       transform: scale(1.5); /* Zoom in */
     }
+    /* Style for the Latest Announcement heading */
+    .announcement-header {
+      font-size: 1.5rem; /* Increase font size */
+      font-weight: bold; /* Make it bold */
+      color: #007bff; /* Change color if needed */
+    }
+    /* Style for the announcement content */
+    .announcement-content {
+      font-size: 1.2rem; /* Increase font size for content */
+      line-height: 1.5; /* Improve readability */
+    }
   </style>
 </head>
 
@@ -94,7 +105,7 @@ $announcementResult = $conn->query($announcementQuery);
             <div class="col-lg-12">
               <div class="card mb-4">
                 <div class="card-header py-3 d-flex justify-content-center">
-                  <h6 class="m-0 font-weight-bold text-primary">Latest Announcement</h6>
+                  <h6 class="announcement-header">Latest Announcement</h6>
                 </div>
                 <div class="card-body">
                   <ul class="list-group">
@@ -102,7 +113,7 @@ $announcementResult = $conn->query($announcementQuery);
                       <?php $announcement = $announcementResult->fetch_assoc(); ?>
                       <li class="list-group-item">
                         <p class="mb-1"> Published by: <strong><?php echo htmlspecialchars($announcement['adminName']); ?></strong></p>
-                        <strong><?php echo htmlspecialchars($announcement['content']); ?></strong>
+                        <p class="announcement-content"><strong><?php echo htmlspecialchars($announcement['content']); ?></strong></p>
                         <br><br><br><br><br>
                         <?php if (!empty($announcement['image_path'])): ?>
                           <div class="mt-2">
