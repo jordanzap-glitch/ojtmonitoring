@@ -88,8 +88,7 @@ if (isset($_POST['submit_time'])) {
         $checkEntryResult = mysqli_query($conn, $checkEntryQuery);
 
         // Check the status of the last submission
-        $lastSubmissionQuery = "SELECT status FROM tbl_week ```php
-ly_time_entries WHERE admissionNumber = '$admissionNumber' ORDER BY date_created DESC LIMIT 1";
+        $lastSubmissionQuery = "SELECT status FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber' ORDER BY date_created DESC LIMIT 1";
         $lastSubmissionResult = mysqli_query($conn, $lastSubmissionQuery);
         $lastStatus = null;
 
