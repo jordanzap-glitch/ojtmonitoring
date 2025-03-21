@@ -136,7 +136,7 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Message Actions</h6>
                 <a class="collapse-item" href="inbox.php">Inbox</a>
-                <a class="collapse-item" href="createAnnoun.php">Create Announcement</a>
+                <a class="collapse-item" href="createAn.php">Create Announcement</a>
             </div>
         </div>
     </li>
