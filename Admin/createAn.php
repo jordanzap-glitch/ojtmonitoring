@@ -17,45 +17,56 @@ if (isset($_POST['submit'])) {
 
     // Handle file upload
     $targetDir = "../Student/uploads/"; // Directory where images will be uploaded
-    $targetFile = $targetDir . basename($_FILES["image"]["name"]);
+    $imagePath = ""; // Initialize image path
     $uploadOk = 1;
-    $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-    // Check if image file is a actual image or fake image
-    $check = getimagesize($_FILES["image"]["tmp_name"]);
-    if ($check === false) {
-        $statusMsg = "<div class='alert alert-danger'>File is not an image.</div>";
-        $uploadOk = 0;
-    }
+    // Check if an image is uploaded
+    if (isset($_FILES["image"]) && $_FILES["image"]["error"] != UPLOAD_ERR_NO_FILE) {
+        $targetFile = $targetDir . basename($_FILES["image"]["name"]);
+        $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-    // Check file size (limit to 2MB)
-    if ($_FILES["image"]["size"] > 2000000) {
-        $statusMsg = "<div class='alert alert-danger'>Sorry, your file is too large. Maximum size is 2MB.</div>";
-        $uploadOk = 0;
-    }
-
-    // Allow certain file formats
-    if (!in_array($imageFileType, ['jpg', 'png', 'jpeg', 'gif'])) {
-        $statusMsg = "<div class='alert alert-danger'>Sorry, only JPG, JPEG, PNG & GIF files are allowed.</div>";
-        $uploadOk = 0;
-    }
-
-    // Check if $uploadOk is set to 0 by an error
-    if ($uploadOk == 0) {
-        $statusMsg .= "<div class='alert alert-danger'>Your file was not uploaded.</div>";
-    } else {
-        // If everything is ok, try to upload file
-        if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
-            // Insert the announcement into the database
-            $query = "INSERT INTO tblannouncement (admin_id, adminName, content, date_created, image_path, is_active) VALUES ('$admin_id', '$name', '$content', '$date_created', '" . basename($_FILES["image"]["name"]) . "', 1)";
-            if (mysqli_query($conn, $query)) {
-                $statusMsg = "<div class='alert alert-success'>Announcement created successfully!</div>";
-            } else {
-                $statusMsg = "<div class='alert alert-danger'>Error: " . mysqli_error($conn) . "</div>";
-            }
-        } else {
-            $statusMsg .= "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
+        // Check if image file is a actual image or fake image
+        $check = getimagesize($_FILES["image"]["tmp_name"]);
+        if ($check === false) {
+            $statusMsg = "<div class='alert alert-danger'>File is not an image.</div>";
+            $uploadOk = 0;
         }
+
+        // Check file size (limit to 2MB)
+        if ($_FILES["image"]["size"] > 2000000) {
+            $statusMsg = "<div class='alert alert-danger'>Sorry, your file is too large. Maximum size is 2MB.</div>";
+            $uploadOk = 0;
+        }
+
+        // Allow certain file formats
+        if (!in_array($imageFileType, ['jpg', 'png', 'jpeg', 'gif'])) {
+            $statusMsg = "<div class='alert alert-danger'>Sorry, only JPG, JPEG, PNG & GIF files are allowed.</div>";
+            $uploadOk = 0;
+        }
+
+        // Check if $uploadOk is set to 0 by an error
+        if ($uploadOk == 0) {
+            $statusMsg .= "<div class='alert alert-danger'>Your file was not uploaded.</div>";
+        } else {
+            // If everything is ok, try to upload file
+            if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
+                $imagePath = basename($_FILES["image"]["name"]); // Set image path if upload is successful
+            } else {
+                $statusMsg .= "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
+            }
+        }
+    }
+
+    // Insert the announcement into the database
+    $query = "INSERT INTO tblannouncement (admin_id, adminName, content, date_created, image_path, is_active) VALUES ('$admin_id', '$name', '$content', '$date_created', '$imagePath', 1)";
+    if (mysqli_query($conn, $query)) {
+        // Deactivate all other announcements
+        $updateQuery = "UPDATE tblannouncement SET is_active = 0 WHERE admin_id = '$admin_id' AND id != LAST_INSERT_ID()";
+        mysqli_query($conn, $updateQuery);
+        
+        $statusMsg = "<div class='alert alert-success'>Announcement created successfully!</div>";
+    } else {
+        $statusMsg = "<div class='alert alert-danger'>Error: " . mysqli_error($conn) . "</div>";
     }
 }
 
@@ -70,6 +81,11 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     $action = $_GET['action'];
 
     if ($action == 'activate') {
+        // Deactivate all other announcements
+        $updateQuery = "UPDATE tblannouncement SET is_active = 0 WHERE admin_id = '$admin_id'";
+        mysqli_query($conn, $updateQuery);
+
+        // Activate the selected announcement
         $updateQuery = "UPDATE tblannouncement SET is_active = 1 WHERE id = '$id'";
         mysqli_query($conn, $updateQuery);
     } elseif ($action == 'deactivate') {
@@ -80,6 +96,26 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     // Redirect to avoid resubmission
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
+}
+
+// Handle delete action
+if (isset($_GET['delete_id'])) {
+    $delete_id = $_GET['delete_id'];
+    $deleteQuery = "DELETE FROM tblannouncement WHERE id = '$delete_id'";
+    if (mysqli_query($conn, $deleteQuery)) {
+        $statusMsg = "<div class='alert alert-danger'>Announcement deleted successfully!</div>";
+    } else {
+        $statusMsg = "<div class='alert alert-danger'>Error: " . mysqli_error($conn) . "</div>";
+    }
+
+    // Redirect to avoid resubmission
+    header("Location: " . $_SERVER['PHP_SELF'] . "?statusMsg=" . urlencode($statusMsg));
+    exit();
+}
+
+// Check for status message in the URL
+if (isset($_GET['statusMsg'])) {
+    $statusMsg = $_GET['statusMsg'];
 }
 ?>
 
@@ -134,9 +170,9 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                                             <textarea class="form-control" name="content" id="content" rows="5" required placeholder="Enter announcement content"></textarea>
                                         </div>
                                         <div class="form-group">
-                                            <label for="image">Upload Image<span class="text-danger ml-2">*</span></label>
-                                            <input type="file" class="form-control" name="image" id="image" required>
-                                            <small class="form-text text-muted">Max size: 2MB. Allowed formats: JPG, JPEG, PNG, GIF.</small>
+                                            <label for="image">Upload Image<span class="text-danger ml-2"></span></label>
+                                            <input type="file" class="form-control" name="image" id="image">
+                                            <small class="form-text text-muted">Max size: 2MB. Allowed formats: JPG, JPEG, PNG, GIF. (Optional)</small>
                                         </div>
                                         <button type="submit" name="submit" class="btn btn-primary">Create Announcement</button>
                                     </form>
@@ -157,7 +193,6 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                             <thead>
                                                 <tr>
-                                                   
                                                     <th>Admin ID</th>
                                                     <th>Admin Name</th>
                                                     <th>Content</th>
@@ -165,13 +200,13 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                                                     <th>Date Created</th>
                                                     <th>Status</th>
                                                     <th>Action</th>
+                                                    <th>Delete</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php if ($announcementResult->num_rows > 0): ?>
                                                     <?php while ($row = $announcementResult->fetch_assoc()): ?>
                                                         <tr>
-                                                           
                                                             <td><?php echo htmlspecialchars($row['admin_id']); ?></td>
                                                             <td><?php echo htmlspecialchars($row['adminName']); ?></td>
                                                             <td><?php echo htmlspecialchars($row['content']); ?></td>
@@ -193,6 +228,7 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
                                                                     <a href="?action=activate&id=<?php echo $row['id']; ?>" class="btn btn-success btn-sm">Activate</a>
                                                                 <?php endif; ?>
                                                             </td>
+                                                            <td><a href="?delete_id=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm">Delete</a></td>
                                                         </tr>
                                                     <?php endwhile; ?>
                                                 <?php else: ?>
