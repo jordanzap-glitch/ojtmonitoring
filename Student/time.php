@@ -83,10 +83,10 @@ if (isset($_POST['submit_time'])) {
     if ($date->format('N') != 1) { // 1 means Monday
         $statusMsg = "<div class='alert alert-danger'>The selected date must be a Monday.</div>";
     } else {
-        // Check if today is Friday
+        // Check if today is Friday, Saturday, or Sunday
         $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
-        if ($currentDay != 5) { // 5 means Friday
-            $statusMsg = "<div class='alert alert-danger'>Submissions can only be made on Fridays.</div>";
+        if ($currentDay < 5) { // Less than 5 means it's before Friday
+            $statusMsg = "<div class='alert alert-danger'>Submissions can only be made from Friday to Sunday.</div>";
         } else {
             // Check if a submission already exists for the current week
             $checkEntryQuery = "SELECT * FROM tbl_weekly_time_entries WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
@@ -153,7 +153,7 @@ if (isset($_POST['submit_time'])) {
                     $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
                 }
             } else {
-                $statusMsg = "<div class='alert alert-danger'>Submissions can only be made on Fridays unless the last submission was denied.</div>";
+                $statusMsg = "<div class='alert alert-danger'>Submissions can only be made from Friday to Sunday unless the last submission was denied.</div>";
             }
         }
     }
