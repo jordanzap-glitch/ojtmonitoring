@@ -85,7 +85,7 @@ if (isset($_POST['submit_time'])) {
     } else {
         // Check if today is Friday, Saturday, or Sunday
         $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
-        if ($currentDay < 5) { // Less than 5 means it's before Friday
+        if ($currentDay < 4) { // Less than 5 means it's before Friday
             $statusMsg = "<div class='alert alert-danger'>Submissions can only be made from Friday to Sunday.</div>";
         } else {
             // Check if a submission already exists for the current week
