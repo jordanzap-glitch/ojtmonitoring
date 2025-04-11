@@ -20,7 +20,7 @@ $repliedCount = $notificationRow['count'];
 
 <nav class="navbar navbar-expand navbar-light bg-gradient-primary topbar mb-4 static-top">
     <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
-        <i class="fa fa-bars"></i>
+      
     </button>
     <div class="text-white big" style="margin-left:100px;"></div>
     <ul class="navbar-nav ml-auto">

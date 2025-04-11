@@ -64,7 +64,7 @@ if (!$classResult) {
 <body id="page-top">
     <div id="wrapper">
         <!-- Sidebar -->
-        <?php include "Includes/sidebar.php"; ?>
+      
         <!-- Sidebar -->
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
@@ -135,7 +135,7 @@ if (!$classResult) {
             <!-- Footer -->
         </div>
     </div>
-
+<?php include "Includes/speeddial.php"; ?>  
     <!-- Scroll to top -->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>

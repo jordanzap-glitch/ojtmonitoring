@@ -82,7 +82,7 @@ if (isset($_POST['change_password'])) {
 <body id="page-top">
   <div id="wrapper">
     <!-- Sidebar -->
-    <?php include "Includes/sidebar.php"; ?>
+   
     <!-- Sidebar -->
     <div id="content-wrapper" class="d-flex flex-column">
       <div id="content">
@@ -159,7 +159,7 @@ if (isset($_POST['change_password'])) {
   <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
-
+  <?php include "Includes/speeddial.php"; ?>  
   <script src="../vendor/jquery/jquery.min.js"></script>
   <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>

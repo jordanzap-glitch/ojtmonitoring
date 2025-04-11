@@ -23,7 +23,7 @@ if (isset($_POST['login'])) {
         $_SESSION['firstName'] = $rows_admin['firstName'];
         $_SESSION['lastName'] = $rows_admin['lastName'];
         $_SESSION['emailAddress'] = $rows_admin['emailAddress'];
-        $_SESSION['user_type'] = 'Administrator'; // Set session user type
+        $_SESSION['user_type'] = 'Admin'; // Set session user type
 
         // Redirect to admin dashboard
         header('Location:Admin/index.php');

@@ -206,7 +206,7 @@ if (isset($_POST['submit_time'])) {
 <body id="page-top">
   <div id="wrapper">
     <!-- Sidebar -->
-      <?php include "Includes/sidebar.php"; ?>
+     
     <!-- Sidebar -->
     <div id="content-wrapper" class="d-flex flex-column">
       <div id="content">
@@ -410,7 +410,7 @@ if (isset($_POST['submit_time'])) {
    <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
-
+  <?php include "Includes/speeddial.php"; ?>                   
   <!-- Modal for Remarks -->
   <div class="modal fade" id="remarksModal" tabindex="-1" role="dialog" aria-labelledby="remarksModalLabel" aria-hidden="true">
       <div class="modal-dialog " role="document">
