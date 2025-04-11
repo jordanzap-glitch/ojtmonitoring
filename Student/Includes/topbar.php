@@ -18,6 +18,10 @@ $notificationRow = $notificationResult->fetch_assoc();
 $repliedCount = $notificationRow['count'];
 ?>
 
+<head>
+<meta name="theme-color" content="#1bb566"> 
+</head>
+
 <nav class="navbar navbar-expand navbar-light bg-gradient-primary topbar mb-4 static-top">
 <a href="index.php" class="nav-link text-white">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
