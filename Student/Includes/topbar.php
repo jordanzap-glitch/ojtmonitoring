@@ -19,7 +19,7 @@ $repliedCount = $notificationRow['count'];
 ?>
 
 <head>
-<meta name="theme-color" content="#1bb566"> 
+<meta name="theme-color" content="#0047AB"> 
 </head>
 
 <nav class="navbar navbar-expand navbar-light bg-gradient-primary topbar mb-4 static-top">
