@@ -19,9 +19,13 @@ $repliedCount = $notificationRow['count'];
 ?>
 
 <nav class="navbar navbar-expand navbar-light bg-gradient-primary topbar mb-4 static-top">
-    <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
-      
-    </button>
+<a href="index.php" class="nav-link text-white">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 7h20L12 2z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2 7v10l10 5 10-5V7H2z" />
+    </svg>
+    Home
+</a>
     <div class="text-white big" style="margin-left:100px;"></div>
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown no-arrow">

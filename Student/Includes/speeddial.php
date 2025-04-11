@@ -100,14 +100,6 @@
     <div class="absolute right-6 bottom-6 group z-50 speeddial-button">
       <div id="speed-dial-menu-dropdown" class="speed-dial-menu flex flex-col hidden items-center mb-4 space-y-2 bg-white shadow-[0px_15px_60px_-4px_rgba(16,24,40,0.10)] rounded-xl border border-gray-200">
         <ul class="text-sm text-gray-600 p-5">
-        <li>
-                <a href="index.php" class="flex items-center mb-5 hover:text-gray-900">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v18H3V3z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9h18M9 3v18" />
-                </svg>
-                <span class="text-sm font-medium">Dashboard</span>
-            </a>
             <li>
             <a href="time.php" class="flex items-center mb-5 hover:text-gray-900">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">

@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id']) && isset($_POST[
 <body id="page-top">
     <div id="wrapper">
         <!-- Sidebar -->
-     
+       
         <!-- Sidebar -->
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
@@ -144,7 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id']) && isset($_POST[
                 <!---Container Fluid-->
             </div>
             <!-- Footer -->
+             <br><br><br><br><br><br><br><br><br><br><br>
             <?php include "Includes/footer.php"; ?>
+            <?php include "Includes/speeddial.php"; ?>
             <!-- Footer -->
         </div>
     </div>
@@ -181,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id']) && isset($_POST[
             </div>
         </div>
     </div>
-    <?php include "Includes/footer.php"; ?>
+
     <script src="../vendor/jquery/jquery.min.js"></script>
     <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
