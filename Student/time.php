@@ -83,78 +83,73 @@ if (isset($_POST['submit_time'])) {
     if ($date->format('N') != 1) { // 1 means Monday
         $statusMsg = "<div class='alert alert-danger'>The selected date must be a Monday.</div>";
     } else {
-        // Check if today is Friday, Saturday, or Sunday
+        // Check if a submission already exists for the current week
+        $checkEntryQuery = "SELECT * FROM tbl_weekly_time_entries WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
+        $checkEntryResult = mysqli_query($conn, $checkEntryQuery);
+
+        // Check the status of the last submission
+        $lastSubmissionQuery = "SELECT status FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber' ORDER BY date_created DESC LIMIT 1";
+        $lastSubmissionResult = mysqli_query($conn, $lastSubmissionQuery);
+        $lastStatus = null;
+
+        if ($lastSubmissionRow = mysqli_fetch_assoc($lastSubmissionResult)) {
+            $lastStatus = $lastSubmissionRow['status'];
+        }
+
+        // Allow submission if the last status is denied or if today is Friday to Sunday
         $currentDay = date('N'); // 1 (for Monday) through 7 (for Sunday)
-        if ($currentDay < 5) { // Less than 5 means it's before Friday
-            $statusMsg = "<div class='alert alert-danger'>Submissions can only be made from Friday to Sunday.</div>";
-        } else {
-            // Check if a submission already exists for the current week
-            $checkEntryQuery = "SELECT * FROM tbl_weekly_time_entries WHERE week_start_date = '$weekStartDate' AND admissionNumber = '$admissionNumber'";
-            $checkEntryResult = mysqli_query($conn, $checkEntryQuery);
-
-            // Check the status of the last submission
-            $lastSubmissionQuery = "SELECT status FROM tbl_weekly_time_entries WHERE admissionNumber = '$admissionNumber' ORDER BY date_created DESC LIMIT 1";
-            $lastSubmissionResult = mysqli_query($conn, $lastSubmissionQuery);
-            $lastStatus = null;
-
-            if ($lastSubmissionRow = mysqli_fetch_assoc($lastSubmissionResult)) {
-                $lastStatus = $lastSubmissionRow['status'];
-            }
-
-            // Allow submission if the last status is denied
-            if ($lastStatus === 'denied') {
-                // Proceed with the rest of the code
-                if (mysqli_num_rows($checkEntryResult) > 0) {
-                    $statusMsg = "<div class='alert alert-danger'>You have already submitted your weekly time for this week.</div>";
-                } else {
-                    // Proceed with the rest of the code
-                    $mondayTime = floatval($_POST['monday_time']);
-                    $tuesdayTime = floatval($_POST['tuesday_time']);
-                    $wednesdayTime = floatval($_POST['wednesday_time']);
-                    $thursdayTime = floatval($_POST['thursday_time']);
-                    $fridayTime = floatval($_POST['friday_time']);
-                    $saturdayTime = floatval($_POST['saturday_time']);
-
-                    // Calculate total time submitted
-                    $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime + $overtime;
-
-                    // Fetch the remaining time from the students table
-                    $remainingTimeQuery = "SELECT remaining_time FROM tblstudents WHERE admissionNumber = '$admissionNumber'";
-                    $remainingTimeResult = mysqli_query($conn, $remainingTimeQuery);
-                    $remainingTime = 500; // Default remaining time if no previous entry found
-
-                    if (mysqli_num_rows($remainingTimeResult) > 0) {
-                        $remainingRow = mysqli_fetch_assoc($remainingTimeResult);
-                        $remainingTime = $remainingRow['remaining_time'];
-                    }
-
-                    // Fetch the active session term ID
-                    $activeSessionQuery = "SELECT Id FROM tblsessionterm WHERE isActive = '1'";
-                    $activeSessionResult = mysqli_query($conn, $activeSessionQuery);
-                    $activeSessionId = null;
-
-                    if ($activeSessionRow = mysqli_fetch_assoc($activeSessionResult)) {
-                        $activeSessionId = $activeSessionRow['Id'];
-                    }
-
-                    // Insert a new record with status 'pending'
-                    $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, status, sessionId, total_hours, image_link, over_time) 
-                        VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', 'pending', '$activeSessionId', '$totalTimeSubmitted', '$image_link', '$overtime')");
-
-                    if ($insertQuery) {
-                        $_SESSION['submission_status'] = "success"; // Set session variable for success
-                        $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Your submission is pending approval.</div>";
-                    } else {
-                        $statusMsg = "<div class='alert alert-danger'>Error submitting weekly time!</div>";
-                    }
-
-                    $_SESSION['form_submitted'] = true; // Mark the form as submitted
-                    $_SESSION['last_submission_date'] = date('Y-m-d'); // Store today's date
-                    $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
-                }
+        if ($lastStatus === 'denied' || ($currentDay >= 5)) {
+            // Proceed with the rest of the code
+            if (mysqli_num_rows($checkEntryResult) > 0 && $lastStatus !== 'denied') {
+                $statusMsg = "<div class='alert alert-danger'>You have already submitted your weekly time for this week.</div>";
             } else {
-                $statusMsg = "<div class='alert alert-danger'>Submissions can only be made from Friday to Sunday unless the last submission was denied.</div>";
+                // Proceed with the rest of the code
+                $mondayTime = floatval($_POST['monday_time']);
+                $tuesdayTime = floatval($_POST['tuesday_time']);
+                $wednesdayTime = floatval($_POST['wednesday_time']);
+                $thursdayTime = floatval($_POST['thursday_time']);
+                $fridayTime = floatval($_POST['friday_time']);
+                $saturdayTime = floatval($_POST['saturday_time']);
+
+                // Calculate total time submitted
+                $totalTimeSubmitted = $mondayTime + $tuesdayTime + $wednesdayTime + $thursdayTime + $fridayTime + $saturdayTime + $overtime;
+
+                // Fetch the remaining time from the students table
+                $remainingTimeQuery = "SELECT remaining_time FROM tblstudents WHERE admissionNumber = '$admissionNumber'";
+                $remainingTimeResult = mysqli_query($conn, $remainingTimeQuery);
+                $remainingTime = 500; // Default remaining time if no previous entry found
+
+                if (mysqli_num_rows($remainingTimeResult) > 0) {
+                    $remainingRow = mysqli_fetch_assoc($remainingTimeResult);
+                    $remainingTime = $remainingRow['remaining_time'];
+                }
+
+                // Fetch the active session term ID
+                $activeSessionQuery = "SELECT Id FROM tblsessionterm WHERE isActive = '1'";
+                $activeSessionResult = mysqli_query($conn, $activeSessionQuery);
+                $activeSessionId = null;
+
+                if ($activeSessionRow = mysqli_fetch_assoc($activeSessionResult)) {
+                    $activeSessionId = $activeSessionRow['Id'];
+                }
+
+                // Insert a new record with status 'pending'
+                $insertQuery = mysqli_query($conn, "INSERT INTO tbl_weekly_time_entries (week_start_date, monday_time, tuesday_time, wednesday_time, thursday_time, friday_time, saturday_time, admissionNumber, student_fullname, course, comp_name, comp_link, remaining_time, status, sessionId, total_hours, image_link, over_time) 
+                    VALUES ('$weekStartDate', '$mondayTime', '$tuesdayTime', '$wednesdayTime', '$thursdayTime', '$fridayTime', '$saturdayTime', '$admissionNumber', '$studentFullname', '$course', '$comp_name', '$comp_link', '$remainingTime', 'pending', '$activeSessionId', '$totalTimeSubmitted', '$image_link', '$overtime')");
+
+                if ($insertQuery) {
+                    $_SESSION['submission_status'] = "success"; // Set session variable for success
+                    $statusMsg = "<div class='alert alert-success'>Weekly time submitted successfully! Your submission is pending approval.</div>";
+                } else {
+                    $statusMsg = "<div class='alert alert-danger'>Error submitting weekly time!</div>";
+                }
+
+                $_SESSION['form_submitted'] = true; // Mark the form as submitted
+                $_SESSION['last_submission_date'] = date('Y-m-d'); // Store today's date
+                $_SESSION['week_start_date'] = $weekStartDate; // Store the week start date
             }
+        } else {
+            $statusMsg = "<div class='alert alert-danger'>Submissions can only be made from Friday to Sunday unless the last submission was denied.</div>";
         }
     }
 }
@@ -168,7 +163,7 @@ if (isset($_POST['submit_time'])) {
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
-  <meta name="author" content="">
+  <meta name ="author" content="">
   <meta name="theme-color" content="#1bb566"> 
   <link href="img/logo/attnlg.jpg" rel="icon">
   <?php include 'Includes/title.php'; ?>
@@ -255,9 +250,8 @@ if (isset($_POST['submit_time'])) {
                         <input type="text" class="form-control" name="student_fullname" value="<?php echo isset($_SESSION['student_fullname']) ? $_SESSION['student_fullname'] : ''; ?>" required readonly>
                     </div>
                     <div class="col-xl-6">
-                      <label class="form-control-label">Section<span class="text-danger ml-2">*</span></label>
-                      <input type="text" class="form-control" name="course" value="<?php echo isset($_SESSION['className']) ? $_SESSION['className'] : ''; ?>" required readonly>
-                  </div>
+                      <label class="form-control-label">Section<span class="text-danger ml-2">*</span></label <input type="text" class="form-control" name="course" value="<?php echo isset($_SESSION['className']) ? $_SESSION['className'] : ''; ?>" required readonly>
+                    </div>
                     </div>
                     <div class="form-group row mb-3">
                     <div class="col-xl-6">
@@ -311,7 +305,7 @@ if (isset($_POST['submit_time'])) {
                     </div>
                     <div class="form-group row mb-3">
                         <div class="col-xl-6">
-                            <label class="form-control-label">Link for DTR (Gdrive Link png, or pdf)<span class="text-danger ml-2">*</span></label>
+                            <label class="form-control-label">Link for DTR (Gdrive Link png, or pdf)<span class="text-danger ml-2 *</span></label>
                             <input type="text" class="form-control" name="image_link" placeholder="Google Drive link" required>
                         </div>
                     </div>
@@ -412,7 +406,7 @@ if (isset($_POST['submit_time'])) {
     </div>
   </div>
 
-   <a class="scroll-to-top rounded" href="#page-top">
+   <a class ="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
 
