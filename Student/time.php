@@ -305,8 +305,9 @@ if (isset($_POST['submit_time'])) {
                     </div>
                     <div class="form-group row mb-3">
                         <div class="col-xl-6">
-                            <label class="form-control-label">Link for DTR (Gdrive Link png, or pdf)<span class="text-danger ml-2 *</span></label>
+                            <label class="form-control-label">Link for DTR (Gdrive Link png, or pdf)<span class="text-danger ml-2"> *</span></label>
                             <input type="text" class="form-control" name="image_link" placeholder="Google Drive link" required>
+                            
                         </div>
                     </div>
                     <button type="submit" name="submit_time" class="btn btn-primary">Submit Time</button>
