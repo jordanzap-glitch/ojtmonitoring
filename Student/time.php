@@ -163,7 +163,7 @@ if (isset($_POST['submit_time'])) {
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
-  <meta name ="author" content="">
+  <meta name="author" content="">
   <meta name="theme-color" content="#1bb566"> 
   <link href="img/logo/attnlg.jpg" rel="icon">
   <?php include 'Includes/title.php'; ?>
@@ -250,8 +250,9 @@ if (isset($_POST['submit_time'])) {
                         <input type="text" class="form-control" name="student_fullname" value="<?php echo isset($_SESSION['student_fullname']) ? $_SESSION['student_fullname'] : ''; ?>" required readonly>
                     </div>
                     <div class="col-xl-6">
-                      <label class="form-control-label">Section<span class="text-danger ml-2">*</span></label <input type="text" class="form-control" name="course" value="<?php echo isset($_SESSION['className']) ? $_SESSION['className'] : ''; ?>" required readonly>
-                    </div>
+                      <label class="form-control-label">Section<span class="text-danger ml-2">*</span></label>
+                      <input type="text" class="form-control" name="course" value="<?php echo isset($_SESSION['className']) ? $_SESSION['className'] : ''; ?>" required readonly>
+                  </div>
                     </div>
                     <div class="form-group row mb-3">
                     <div class="col-xl-6">
@@ -305,9 +306,8 @@ if (isset($_POST['submit_time'])) {
                     </div>
                     <div class="form-group row mb-3">
                         <div class="col-xl-6">
-                            <label class="form-control-label">Link for DTR (Gdrive Link png, or pdf)<span class="text-danger ml-2"> *</span></label>
+                            <label class="form-control-label">Link for DTR (Gdrive Link png, or pdf)<span class="text-danger ml-2">*</span></label>
                             <input type="text" class="form-control" name="image_link" placeholder="Google Drive link" required>
-                            
                         </div>
                     </div>
                     <button type="submit" name="submit_time" class="btn btn-primary">Submit Time</button>
@@ -407,7 +407,7 @@ if (isset($_POST['submit_time'])) {
     </div>
   </div>
 
-   <a class ="scroll-to-top rounded" href="#page-top">
+   <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
 
