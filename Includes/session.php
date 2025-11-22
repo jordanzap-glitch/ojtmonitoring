@@ -1,5 +1,5 @@
 <?php
-$sessionPath = __DIR__ . '/session_tmp';
+$sessionPath = dirname(__DIR__) . '../session_tmp'; 
 if (!is_dir($sessionPath)) {
     mkdir($sessionPath, 0777, true); // will only run once
 }
