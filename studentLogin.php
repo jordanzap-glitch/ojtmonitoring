@@ -72,7 +72,7 @@ session_start();
 
     if($num > 0){
 
-      $_SESSION['userId'] = $rows['Id'];
+      $_SESSION['userId'] = (int)$rows['Id'];
       $_SESSION['firstName'] = $rows['firstName'];
       $_SESSION['lastName'] = $rows['lastName'];
       $_SESSION['email'] = $rows['email'];

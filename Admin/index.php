@@ -1,15 +1,12 @@
 <?php 
+error_reporting(E_ALL);
 include '../Includes/session.php'; // Include session management
 include '../Includes/dbcon.php'; // Include database connection
 
 $error_message = '';
 $success_message = '';
 
-$userId = getUserId();
-if ($userId === 0) {
-  header('Location: ../index.php');
-  exit();
-}
+$userId = $_SESSION['userId'];
 
 // Check if the user is logged in
 // Fetch the count of pending DTR submissions

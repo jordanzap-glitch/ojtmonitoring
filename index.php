@@ -25,7 +25,7 @@ if (isset($_POST['login'])) {
 
     if ($num_admin > 0) {
         // Admin user detected
-        $_SESSION['userId'] = $rows_admin['Id'];
+        $_SESSION['userId'] = (int)$rows_admin['Id'];
         $_SESSION['firstName'] = $rows_admin['firstName'];
         $_SESSION['lastName'] = $rows_admin['lastName'];
         $_SESSION['emailAddress'] = $rows_admin['emailAddress'];
@@ -44,7 +44,7 @@ if (isset($_POST['login'])) {
 
         if ($num_teacher > 0) {
             // Class Teacher detected
-            $_SESSION['userId'] = $rows_teacher['Id'];
+          $_SESSION['userId'] = (int)$rows_teacher['Id'];
             $_SESSION['firstName'] = $rows_teacher['firstName'];
             $_SESSION['lastName'] = $rows_teacher['lastName'];
             $_SESSION['emailAddress'] = $rows_teacher['emailAddress'];
@@ -65,7 +65,7 @@ if (isset($_POST['login'])) {
 
             if ($num_student > 0) {
                 // Student detected
-                $_SESSION['userId'] = $rows_student['Id'];
+              $_SESSION['userId'] = (int)$rows_student['Id'];
                 $_SESSION['admissionNumber'] = $rows_student['admissionNumber'];
                 $_SESSION['firstName'] = $rows_student['firstName'];
                 $_SESSION['lastName'] = $rows_student['lastName'];

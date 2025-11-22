@@ -1,1 +1,1 @@
-userId|s:1:"5";firstName|s:7:"Fernand";lastName|s:5:"Layug";emailAddress|s:18:"f.layug@src.edu.ph";user_type|s:5:"Admin";admissionNumber|s:9:"210001257";email|s:21:"mj.devibar@src.edu.ph";classId|s:1:"2";ot_isactive|s:1:"0";
+userId|i:5;firstName|s:7:"Fernand";lastName|s:5:"Layug";emailAddress|s:18:"f.layug@src.edu.ph";user_type|s:5:"Admin";
