@@ -1,22 +1,30 @@
 <?php
-session_start(); 
-
-if (!isset($_SESSION['userId']))
-{
-  echo "<script type = \"text/javascript\">
-  window.location = (\"../index.php\");
-  </script>";
-
+$sessionPath = __DIR__ . '/session_tmp';
+if (!is_dir($sessionPath)) {
+    mkdir($sessionPath, 0777, true); // will only run once
 }
-// $expiry = 1800 ;//session expiry required after 30 mins
-// if (isset($_SESSION['LAST']) && (time() - $_SESSION['LAST'] > $expiry)) {
+session_save_path($sessionPath);
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-//     session_unset();
-//     session_destroy();
-//     echo "<script type = \"text/javascript\">
-//           window.location = (\"../index.php\");
-//           </script>";
+if (!function_exists('setUserId')) {
+    function setUserId($id)
+    {
+        $_SESSION['userId'] = (int)$id;
+    }
+}
 
-// }
-// $_SESSION['LAST'] = time();
+if (!function_exists('getUserId')) {
+    function getUserId()
+    {
+        return isset($_SESSION['userId']) ? (int)$_SESSION['userId'] : 0;
+    }
+}
+
+$userId = getUserId();
+if ($userId === 0) {
+  header('Location: ../index.php');
+  exit();
+}
 ?>

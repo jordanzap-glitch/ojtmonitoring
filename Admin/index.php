@@ -5,6 +5,12 @@ include '../Includes/dbcon.php'; // Include database connection
 $error_message = '';
 $success_message = '';
 
+$userId = getUserId();
+if ($userId === 0) {
+  header('Location: ../index.php');
+  exit();
+}
+
 // Check if the user is logged in
 // Fetch the count of pending DTR submissions
 $queryPendingDTR = "SELECT COUNT(*) as pendingCount FROM tbl_weekly_time_entries WHERE status = 'pending'";
@@ -17,7 +23,7 @@ $query = "SELECT tblclass.className, tblclassarms.classArmName
 FROM tblclassteacher
 INNER JOIN tblclass ON tblclass.Id = tblclassteacher.classId
 INNER JOIN tblclassarms ON tblclassarms.Id = tblclassteacher.classArmId
-WHERE tblclassteacher.Id = '$_SESSION[userId]'";
+WHERE tblclassteacher.Id = $userId";
 
 $rs = $conn->query($query);
 $num = $rs->num_rows;
