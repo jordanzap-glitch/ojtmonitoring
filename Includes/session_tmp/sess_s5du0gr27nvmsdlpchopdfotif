@@ -1,1 +1,1 @@
-userId|s:1:"1";firstName|s:3:"src";lastName|s:5:"admin";emailAddress|s:18:"srcadmin@gmail.com";user_type|s:5:"Admin";
+userId|s:1:"1";firstName|s:3:"src";lastName|s:5:"admin";emailAddress|s:18:"srcadmin@gmail.com";user_type|s:5:"Admin";admissionNumber|N;

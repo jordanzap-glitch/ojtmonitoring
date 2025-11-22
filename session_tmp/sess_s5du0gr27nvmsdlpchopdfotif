@@ -1,1 +1,1 @@
-userId|s:1:"1";firstName|s:3:"src";lastName|s:5:"admin";emailAddress|s:18:"srcadmin@gmail.com";user_type|s:5:"Admin";
+userId|s:1:"1";firstName|s:9:"Mary Jane";lastName|s:7:"Devibar";emailAddress|s:18:"srcadmin@gmail.com";user_type|s:7:"Student";admissionNumber|s:9:"210001257";email|s:21:"mj.devibar@src.edu.ph";classId|s:1:"2";ot_isactive|s:1:"0";

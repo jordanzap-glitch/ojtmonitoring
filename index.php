@@ -1,8 +1,14 @@
 <?php
 ob_start();
-session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+$sessionPath = __DIR__ . '/session_tmp';
+if (!is_dir($sessionPath)) {
+    mkdir($sessionPath, 0777, true); // will only run once
+}
+session_save_path($sessionPath);
+
+session_start();
 include 'Includes/dbcon.php';
 if (isset($_POST['login'])) {
 
